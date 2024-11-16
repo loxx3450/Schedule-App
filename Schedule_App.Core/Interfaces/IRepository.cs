@@ -12,6 +12,9 @@ namespace Schedule_App.Core.Interfaces
         IQueryable<T> GetAll<T>()
             where T : class;
 
+        IQueryable<T> GetAllNotDeleted<T>()
+            where T : AuditableEntity;
+
         Task<T> Add<T>(T obj, CancellationToken cancellationToken)
             where T : class;
 

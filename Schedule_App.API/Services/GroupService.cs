@@ -19,7 +19,7 @@ namespace Schedule_App.API.Services
 
         public async Task<IEnumerable<GroupReadDTO>> GetGroups(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
         {
-            var result = await _repository.GetAll<Group>()
+            var result = await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
                 .Skip(skip)
                 .Take(take)
@@ -30,7 +30,7 @@ namespace Schedule_App.API.Services
 
         public async Task<IEnumerable<GroupReadDTO>> GetGroupsByTitle(string title, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
         {
-            var result = await _repository.GetAll<Group>()
+            var result = await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
                 .Where(g => g.Title.Contains(title))
                 .Skip(skip)
@@ -42,7 +42,7 @@ namespace Schedule_App.API.Services
 
         public async Task<IEnumerable<GroupReadDTO>> GetGroupsByTeacherId(int id, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
         {
-            var result = await _repository.GetAll<GroupTeacher>()
+            var result = await _repository.GetAllNotDeleted<GroupTeacher>()
                 .AsNoTracking()
                 .Where(gt => gt.TeacherId == id)
                 .Skip(skip)
@@ -55,7 +55,7 @@ namespace Schedule_App.API.Services
 
         public async Task<GroupReadDTO> GetGroupById(int id, CancellationToken cancellationToken = default)
         {
-            var group = await _repository.GetAll<Group>()
+            var group = await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(g => g.Id == id);
 

@@ -23,6 +23,12 @@ namespace Schedule_App.Storage
             return _context.Set<T>();
         }
 
+        public IQueryable<T> GetAllNotDeleted<T>() where T : AuditableEntity
+        {
+            return _context.Set<T>()
+                .Where(e => e.DeletedAt == null);
+        }
+
         public async Task<T> Add<T>(T obj, CancellationToken cancellationToken = default) where T : class
         {
             await _context.Set<T>()
