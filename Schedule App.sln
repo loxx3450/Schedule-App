@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schedule_App.API", "Schedule_App.API\Schedule_App.API.csproj", "{49487464-7F99-403A-9DFF-85BA5B11F641}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schedule_App.API", "Schedule_App.API\Schedule_App.API.csproj", "{49487464-7F99-403A-9DFF-85BA5B11F641}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schedule_App.Core", "Schedule_App.Core\Schedule_App.Core.csproj", "{577CA4B8-EF94-4B02-8064-56A6C4CAB9E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schedule_App.Storage", "Schedule_App.Storage\Schedule_App.Storage.csproj", "{ED297337-0CF0-47C0-8D55-920647E61F16}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{49487464-7F99-403A-9DFF-85BA5B11F641}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49487464-7F99-403A-9DFF-85BA5B11F641}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49487464-7F99-403A-9DFF-85BA5B11F641}.Release|Any CPU.Build.0 = Release|Any CPU
+		{577CA4B8-EF94-4B02-8064-56A6C4CAB9E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{577CA4B8-EF94-4B02-8064-56A6C4CAB9E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{577CA4B8-EF94-4B02-8064-56A6C4CAB9E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{577CA4B8-EF94-4B02-8064-56A6C4CAB9E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED297337-0CF0-47C0-8D55-920647E61F16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED297337-0CF0-47C0-8D55-920647E61F16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED297337-0CF0-47C0-8D55-920647E61F16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED297337-0CF0-47C0-8D55-920647E61F16}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
