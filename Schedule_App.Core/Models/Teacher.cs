@@ -34,6 +34,8 @@ namespace Schedule_App.Core.Models
         [Range(18, 80)]
         public byte Age { get; set; }
 
+        public virtual List<Subject> Subjects { get; set; } = [];
+
         public virtual List<Lesson> Lessons { get; set; } = [];
     }
 }
