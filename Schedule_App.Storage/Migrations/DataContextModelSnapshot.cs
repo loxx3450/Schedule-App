@@ -103,7 +103,7 @@ namespace Schedule_App.Storage.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("GroupTeacher");
+                    b.ToTable("GroupsTeachers");
                 });
 
             modelBuilder.Entity("Schedule_App.Core.Models.Lesson", b =>
@@ -270,13 +270,13 @@ namespace Schedule_App.Storage.Migrations
             modelBuilder.Entity("Schedule_App.Core.Models.GroupTeacher", b =>
                 {
                     b.HasOne("Schedule_App.Core.Models.Group", "Group")
-                        .WithMany("Teachers")
+                        .WithMany()
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Schedule_App.Core.Models.Teacher", "Teacher")
-                        .WithMany("Groups")
+                        .WithMany()
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -337,8 +337,6 @@ namespace Schedule_App.Storage.Migrations
             modelBuilder.Entity("Schedule_App.Core.Models.Group", b =>
                 {
                     b.Navigation("Lessons");
-
-                    b.Navigation("Teachers");
                 });
 
             modelBuilder.Entity("Schedule_App.Core.Models.LessonStatus", b =>
@@ -353,8 +351,6 @@ namespace Schedule_App.Storage.Migrations
 
             modelBuilder.Entity("Schedule_App.Core.Models.Teacher", b =>
                 {
-                    b.Navigation("Groups");
-
                     b.Navigation("Lessons");
                 });
 #pragma warning restore 612, 618

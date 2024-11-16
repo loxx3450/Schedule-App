@@ -65,5 +65,6 @@ namespace Schedule_App.Storage
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<LessonStatus> LessonStatuses { get; set; }
         public DbSet<Classroom> Classrooms { get; set; }
+        public DbSet<GroupTeacher> GroupsTeachers { get; set; }
     }
 }

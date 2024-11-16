@@ -94,7 +94,7 @@ namespace Schedule_App.Storage.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GroupTeacher",
+                name: "GroupsTeachers",
                 columns: table => new
                 {
                     GroupId = table.Column<int>(type: "integer", nullable: false),
@@ -105,15 +105,15 @@ namespace Schedule_App.Storage.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GroupTeacher", x => new { x.GroupId, x.TeacherId });
+                    table.PrimaryKey("PK_GroupsTeachers", x => new { x.GroupId, x.TeacherId });
                     table.ForeignKey(
-                        name: "FK_GroupTeacher_Groups_GroupId",
+                        name: "FK_GroupsTeachers_Groups_GroupId",
                         column: x => x.GroupId,
                         principalTable: "Groups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GroupTeacher_Teachers_TeacherId",
+                        name: "FK_GroupsTeachers_Teachers_TeacherId",
                         column: x => x.TeacherId,
                         principalTable: "Teachers",
                         principalColumn: "Id",
@@ -182,8 +182,8 @@ namespace Schedule_App.Storage.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_GroupTeacher_TeacherId",
-                table: "GroupTeacher",
+                name: "IX_GroupsTeachers_TeacherId",
+                table: "GroupsTeachers",
                 column: "TeacherId");
 
             migrationBuilder.CreateIndex(
@@ -234,7 +234,7 @@ namespace Schedule_App.Storage.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "GroupTeacher");
+                name: "GroupsTeachers");
 
             migrationBuilder.DropTable(
                 name: "Lessons");

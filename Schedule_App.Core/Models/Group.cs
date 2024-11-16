@@ -17,8 +17,6 @@ namespace Schedule_App.Core.Models
         [MaxLength(20)]
         public string Title { get; set; } = null!;
 
-        public virtual List<GroupTeacher> Teachers { get; set; } = [];
-
         public virtual List<Lesson> Lessons { get; set; } = [];
     }
 }
