@@ -14,6 +14,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<ILessonStatusService, LessonStatusService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 
 builder.Services.AddControllers(opt =>
 {

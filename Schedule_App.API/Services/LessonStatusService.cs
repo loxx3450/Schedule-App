@@ -20,6 +20,7 @@ namespace Schedule_App.API.Services
         public async Task<IEnumerable<LessonStatusReadDTO>> GetLessonStatuses(CancellationToken cancellationToken = default)
         {
             var lessonStatuses = await _repository.GetAll<LessonStatus>()
+                .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
 
             return _mapper.Map<IEnumerable<LessonStatusReadDTO>>(lessonStatuses);
