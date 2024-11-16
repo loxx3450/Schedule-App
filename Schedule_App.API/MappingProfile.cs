@@ -9,10 +9,10 @@ namespace Schedule_App.API
     {
         public MappingProfile()
         {
-            CreateMap<LessonStatus, LessonStatusReadDTO>();
+            CreateMap<LessonStatus, LessonStatusReadDTO>().ReverseMap();
 
-            CreateMap<Group, GroupReadDTO>();
-            CreateMap<Group, GroupCreateDTO>();
+            CreateMap<Group, GroupReadDTO>().ReverseMap();
+            CreateMap<Group, GroupCreateDTO>().ReverseMap();
         }
     }
 }
