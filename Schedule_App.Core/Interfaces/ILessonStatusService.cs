@@ -1,4 +1,5 @@
-﻿using Schedule_App.Core.Models;
+﻿using Schedule_App.API.DTOs.LessonStatus;
+using Schedule_App.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace Schedule_App.Core.Interfaces
 {
     public interface ILessonStatusService
     {
-        Task<IEnumerable<LessonStatus>> GetLessonStatuses(CancellationToken cancellationToken);
+        Task<IEnumerable<LessonStatusReadDTO>> GetLessonStatuses(CancellationToken cancellationToken);
 
-        Task<LessonStatus> GetLessonStatusById(int id, CancellationToken cancellationToken);
+        Task<LessonStatusReadDTO> GetLessonStatusById(int id, CancellationToken cancellationToken);
     }
 }
