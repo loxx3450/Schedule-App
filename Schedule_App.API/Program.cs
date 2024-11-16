@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Schedule_App.Core.Interfaces;
 using Schedule_App.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<DataContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Local")));
+
+builder.Services.AddScoped<IRepository, Repository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
