@@ -17,7 +17,7 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<LessonStatusReadDTO>> GetLessonStatuses(CancellationToken cancellationToken)
+        public async Task<IEnumerable<LessonStatusReadDTO>> GetLessonStatuses(CancellationToken cancellationToken = default)
         {
             var lessonStatuses = await _repository.GetAll<LessonStatus>()
                 .ToArrayAsync(cancellationToken);
@@ -25,7 +25,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<IEnumerable<LessonStatusReadDTO>>(lessonStatuses);
         }
 
-        public async Task<LessonStatusReadDTO> GetLessonStatusById(int id, CancellationToken cancellationToken)
+        public async Task<LessonStatusReadDTO> GetLessonStatusById(int id, CancellationToken cancellationToken = default)
         {
             var lessonStatus = await _repository.GetAll<LessonStatus>().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 

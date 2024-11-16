@@ -23,10 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Schedule_App.Core\Schedule_App.Core.csproj" />
     <ProjectReference Include="..\Schedule_App.Storage\Schedule_App.Storage.csproj" />
   </ItemGroup>
