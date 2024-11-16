@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Schedule_App.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,12 +12,12 @@ namespace Schedule_App.Core.Interfaces
         IQueryable<T> GetAll<T>()
             where T : class;
 
-        Task<T> Add<T>(T obj)
+        Task<T> Add<T>(T obj, CancellationToken cancellationToken)
             where T : class;
 
         Task Delete<T>(T obj)
-            where T : class;
+            where T : AuditableEntity;
 
-        Task SaveChanges();
+        Task SaveChanges(CancellationToken cancellationToken);
     }
 }

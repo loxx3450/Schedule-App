@@ -1,4 +1,6 @@
-﻿using Schedule_App.Core.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using Schedule_App.Core.Interfaces;
+using Schedule_App.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,26 +23,25 @@ namespace Schedule_App.Storage
             return _context.Set<T>();
         }
 
-        public async Task<T> Add<T>(T obj) where T : class
+        public async Task<T> Add<T>(T obj, CancellationToken cancellationToken = default) where T : class
         {
             await _context.Set<T>()
-                .AddAsync(obj);
-
-            await _context.SaveChangesAsync();
+                .AddAsync(obj, cancellationToken);
 
             return obj;
         }
 
-        public Task Delete<T>(T obj) where T : class
+        // Soft delete
+        public Task Delete<T>(T obj) where T : AuditableEntity
         {
-            _context.Set<T>().Remove(obj);
+            obj.DeletedAt = DateTime.UtcNow;
 
-            return Task.CompletedTask;
+            return SaveChanges();
         }
 
-        public async Task SaveChanges()
+        public Task SaveChanges(CancellationToken cancellationToken = default)
         {
-            await _context.SaveChangesAsync();
+            return _context.SaveChangesAsync(cancellationToken);
         }
     }
 }
