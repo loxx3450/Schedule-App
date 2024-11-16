@@ -19,17 +19,6 @@ namespace Schedule_App.Storage
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                foreach (var property in entityType.GetProperties())
-                {
-                    if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
-                    {
-                        property.SetColumnType("timestamp");
-                    }
-                }
-            }
-
             // Adding unique fields
             modelBuilder.Entity<Classroom>()
                 .HasIndex(c => c.Title)
