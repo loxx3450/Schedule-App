@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DataContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Local")));
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<ILessonStatusService, LessonStatusService>();
 
