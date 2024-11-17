@@ -10,10 +10,12 @@ namespace Schedule_App.API.Controllers
     {
         private const string BASE_ENDPOINT = "api/teachers";
         private readonly ITeacherService _teacherService;
+        private readonly ITeacherSubjectService _teacherSubjectService;
 
-        public TeacherController(ITeacherService teacherService)
+        public TeacherController(ITeacherService teacherService, ITeacherSubjectService teacherSubjectService)
         {
             _teacherService = teacherService;
+            _teacherSubjectService = teacherSubjectService;
         }
 
         [HttpGet]
@@ -78,7 +80,7 @@ namespace Schedule_App.API.Controllers
         [HttpPost("{teacherId:int}/subject/{subjectId:int}")]
         public async Task<ActionResult> AddSubjectToTeacher([FromRoute] int teacherId, [FromRoute] int subjectId, CancellationToken cancellationToken)
         {
-            await _teacherService.AddSubjectToTeacher(teacherId, subjectId, cancellationToken);
+            await _teacherSubjectService.AddSubjectToTeacher(teacherId, subjectId, cancellationToken);
 
             return NoContent();
         }
@@ -102,7 +104,7 @@ namespace Schedule_App.API.Controllers
         [HttpDelete("{teacherId:int}/subject/{subjectId:int}")]
         public async Task<ActionResult> RemoveSubjectFromTeacher([FromRoute] int teacherId, [FromRoute] int subjectId, CancellationToken cancellationToken)
         {
-            await _teacherService.RemoveSubjectFromTeacher(teacherId, subjectId, cancellationToken);
+            await _teacherSubjectService.RemoveSubjectFromTeacher(teacherId, subjectId, cancellationToken);
 
             return NoContent();
         }

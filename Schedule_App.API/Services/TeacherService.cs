@@ -138,38 +138,6 @@ namespace Schedule_App.API.Services
             return _mapper.Map<TeacherReadDTO>(teacher);
         }
 
-        public async Task AddSubjectToTeacher(int teacherId, int subjectId, CancellationToken cancellationToken = default)
-        {
-            var (teacher, subject) = await GetTeacherAndSubject(teacherId, subjectId, cancellationToken);
-
-            if (teacher.Subjects.Any(s => s.Id == subjectId))
-            {
-                throw new ArgumentException($"Subject with ID '{subjectId}' is already associated with this teacher");
-            }
-
-            teacher.UpdatedAt = DateTime.UtcNow;
-
-            teacher.Subjects.Add(subject);
-
-            await _repository.SaveChanges(cancellationToken);
-        }
-
-        public async Task RemoveSubjectFromTeacher(int teacherId, int subjectId, CancellationToken cancellationToken = default)
-        {
-            var (teacher, subject) = await GetTeacherAndSubject(teacherId, subjectId, cancellationToken);
-
-            if (! teacher.Subjects.Any(s => s.Id == subjectId))
-            {
-                throw new ArgumentException($"Subject with ID '{subjectId}' is not associated with this teacher");
-            }
-
-            teacher.UpdatedAt = DateTime.UtcNow;
-
-            teacher.Subjects.Remove(subject);
-
-            await _repository.SaveChanges(cancellationToken);
-        }
-
         public async Task DeleteTeacher(int id, CancellationToken cancellationToken = default)
         {
             var teacher = await FindTeacherById(id, cancellationToken);
@@ -194,26 +162,6 @@ namespace Schedule_App.API.Services
         {
             return _repository.GetAll<Teacher>()
                 .AnyAsync(t => t.Username == username);
-        }
-
-        private async Task<(Teacher teacher, Subject subject)> GetTeacherAndSubject(int teacherId, int subjectId, CancellationToken cancellationToken = default)
-        {
-            var teacher = await FindTeacherById(teacherId, cancellationToken);
-
-            if (teacher is null)
-            {
-                throw new KeyNotFoundException($"Teacher with ID '{teacherId}' is not found");
-            }
-
-            var subject = await _repository.GetAllNotDeleted<Subject>()
-                .FirstOrDefaultAsync(s => s.Id == subjectId, cancellationToken);
-
-            if (subject is null)
-            {
-                throw new KeyNotFoundException($"Subject with ID '{subjectId}' is not found");
-            }
-
-            return (teacher, subject);
         }
     }
 }

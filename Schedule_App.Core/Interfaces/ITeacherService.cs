@@ -23,10 +23,6 @@ namespace Schedule_App.Core.Interfaces
 
         Task<TeacherReadDTO> UpdateTeacher(int id, TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken);
 
-        Task AddSubjectToTeacher(int teacherId, int subjectId, CancellationToken cancellationToken);
-
-        Task RemoveSubjectFromTeacher(int teacherId, int subjectId, CancellationToken cancellationToken);
-
         Task DeleteTeacher(int id, CancellationToken cancellationToken);
     }
 }
