@@ -61,7 +61,7 @@ namespace Schedule_App.API.Services
 
             if (group is null)
             {
-                throw new KeyNotFoundException($"Group with ID {id} is not found");
+                throw new KeyNotFoundException($"Group with ID '{id}' is not found");
             }
 
             return _mapper.Map<GroupReadDTO>(group);
@@ -71,10 +71,7 @@ namespace Schedule_App.API.Services
         {
             var group = _mapper.Map<Group>(groupCreateDTO);
 
-            group.CreatedAt = DateTime.UtcNow;
-            group.UpdatedAt = DateTime.UtcNow;
-
-            await _repository.Add<Group>(group, cancellationToken);
+            await _repository.AddAuditableEntity<Group>(group, cancellationToken);
 
             await _repository.SaveChanges(cancellationToken);
 
@@ -88,7 +85,7 @@ namespace Schedule_App.API.Services
 
             if (group is null)
             {
-                throw new KeyNotFoundException($"Group with ID {id} is not found");
+                throw new KeyNotFoundException($"Group with ID '{id}' is not found");
             }
 
             group.UpdatedAt = DateTime.UtcNow;
@@ -101,13 +98,17 @@ namespace Schedule_App.API.Services
 
         public async Task DeleteGroup(int id, CancellationToken cancellationToken = default)
         {
-            var group = await _repository.GetAll<Group>()
+            var group = await _repository.GetAllNotDeleted<Group>()
                 .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
 
-            if (group is not null)
+            if (group is null)
             {
-                await _repository.Delete<Group>(group);
+                throw new KeyNotFoundException($"Group with ID '{id}' is not found");
             }
+
+            await _repository.Delete<Group>(group);
+
+            await _repository.SaveChanges(cancellationToken);
         }
     }
 }

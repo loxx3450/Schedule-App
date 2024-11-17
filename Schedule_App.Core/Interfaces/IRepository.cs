@@ -18,6 +18,9 @@ namespace Schedule_App.Core.Interfaces
         Task<T> Add<T>(T obj, CancellationToken cancellationToken)
             where T : class;
 
+        Task<T> AddAuditableEntity<T>(T obj, CancellationToken cancellationToken = default)
+            where T : AuditableEntity;
+
         Task Delete<T>(T obj)
             where T : AuditableEntity;
 

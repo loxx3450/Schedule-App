@@ -37,12 +37,23 @@ namespace Schedule_App.Storage
             return obj;
         }
 
+        public async Task<T> AddAuditableEntity<T>(T obj, CancellationToken cancellationToken = default) where T : AuditableEntity
+        {
+            obj.CreatedAt = DateTime.UtcNow;
+            obj.UpdatedAt = DateTime.UtcNow;
+
+            await _context.Set<T>()
+                .AddAsync(obj, cancellationToken);
+
+            return obj;
+        }
+
         // Soft delete
         public Task Delete<T>(T obj) where T : AuditableEntity
         {
             obj.DeletedAt = DateTime.UtcNow;
 
-            return SaveChanges();
+            return Task.CompletedTask;
         }
 
         public Task SaveChanges(CancellationToken cancellationToken = default)
