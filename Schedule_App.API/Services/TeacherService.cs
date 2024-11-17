@@ -116,9 +116,13 @@ namespace Schedule_App.API.Services
             }
 
             // if new username is not null and not already taken
-            if (! string.IsNullOrEmpty(teacherUpdateDTO.Username) 
-                && ! await IsUsernameTaken(teacherUpdateDTO.Username, cancellationToken))
+            if (! string.IsNullOrEmpty(teacherUpdateDTO.Username))
             {
+                if (await IsUsernameTaken(teacherUpdateDTO.Username, cancellationToken))
+                {
+                    throw new ArgumentException($"Teacher with Username '{teacherUpdateDTO.Username}' already exists");
+                }
+
                 teacher.Username = teacherUpdateDTO.Username;
             }
             // TODO: add hashing
@@ -202,7 +206,6 @@ namespace Schedule_App.API.Services
             }
 
             var subject = await _repository.GetAllNotDeleted<Subject>()
-                .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.Id == subjectId, cancellationToken);
 
             if (subject is null)
