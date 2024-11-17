@@ -32,6 +32,10 @@ namespace Schedule_App.Storage
                 .HasIndex(t => t.Username)
                 .IsUnique();
 
+            modelBuilder.Entity<Group>()
+                .HasIndex(t => t.Title)
+                .IsUnique();
+
             modelBuilder.Entity<LessonStatus>()
                 .HasIndex(t => t.Description)
                 .IsUnique();

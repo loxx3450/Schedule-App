@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Schedule_App.Core.DTOs.Group;
+using Schedule_App.Core.DTOs.Teacher;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Core.Models;
 
@@ -28,7 +29,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
         }
 
-        public async Task<IEnumerable<GroupReadDTO>> GetGroupsByTitle(string title, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GroupReadDTO>> GetGroupsByTitlePattern(string title, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
         {
             var result = await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
@@ -71,6 +72,11 @@ namespace Schedule_App.API.Services
         {
             var group = _mapper.Map<Group>(groupCreateDTO);
 
+            if (await IsTitleTaken(groupCreateDTO.Title, cancellationToken))
+            {
+                throw new ArgumentException($"Group with Title '{groupCreateDTO.Title}' already exists");
+            }
+
             await _repository.AddAuditableEntity<Group>(group, cancellationToken);
 
             await _repository.SaveChanges(cancellationToken);
@@ -88,8 +94,13 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Group with ID '{id}' is not found");
             }
 
-            group.UpdatedAt = DateTime.UtcNow;
+            if (await IsTitleTaken(newTitle, cancellationToken))
+            {
+                throw new ArgumentException($"Group with Title '{newTitle}' already exists");
+            }
+
             group.Title = newTitle;
+            group.UpdatedAt = DateTime.UtcNow;
 
             await _repository.SaveChanges(cancellationToken);
 
@@ -109,6 +120,12 @@ namespace Schedule_App.API.Services
             await _repository.Delete<Group>(group);
 
             await _repository.SaveChanges(cancellationToken);
+        }
+
+        private Task<bool> IsTitleTaken(string title, CancellationToken cancellationToken)
+        {
+            return _repository.GetAll<Group>()
+                .AnyAsync(g => g.Title == title, cancellationToken);
         }
     }
 }

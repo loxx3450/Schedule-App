@@ -31,7 +31,7 @@ namespace Schedule_App.API.Controllers
             }
             else
             {
-                result = await _groupService.GetGroupsByTitle(title, skip, take, cancellationToken);
+                result = await _groupService.GetGroupsByTitlePattern(title, skip, take, cancellationToken);
             }
 
             return Ok(result);

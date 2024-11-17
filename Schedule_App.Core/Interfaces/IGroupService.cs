@@ -11,7 +11,7 @@ namespace Schedule_App.Core.Interfaces
     {
         Task<IEnumerable<GroupReadDTO>> GetGroups(int skip, int take, CancellationToken cancellationToken);
 
-        Task<IEnumerable<GroupReadDTO>> GetGroupsByTitle(string title, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<GroupReadDTO>> GetGroupsByTitlePattern(string title, int skip, int take, CancellationToken cancellationToken);
 
         Task<IEnumerable<GroupReadDTO>> GetGroupsByTeacherId(int id, int skip, int take, CancellationToken cancellationToken);
 
