@@ -6,9 +6,10 @@ using Schedule_App.Core.Models;
 namespace Schedule_App.API.Controllers
 {
     [ApiController]
-    [Route("groups")]
+    [Route(BASE_ENDPOINT)]
     public class GroupController : ControllerBase
     {
+        private const string BASE_ENDPOINT = "api/groups";
         private readonly IGroupService _groupService;
 
         public GroupController(IGroupService groupService)
@@ -37,6 +38,14 @@ namespace Schedule_App.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<GroupReadDTO>> GetGroupById([FromRoute] int id, CancellationToken cancellationToken)
+        {
+            var result = await _groupService.GetGroupById(id, cancellationToken);
+
+            return Ok(result);
+        }
+
         [HttpGet("search/teacher/{id:int}")]
         public async Task<ActionResult<IEnumerable<GroupReadDTO>>> GetGroupsByTeacherId(
             [FromRoute] int id, 
@@ -49,10 +58,10 @@ namespace Schedule_App.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<GroupReadDTO>> GetGroupById([FromRoute] int id, CancellationToken cancellationToken)
+        [HttpGet("search/title/{title}")]
+        public async Task<ActionResult<GroupReadDTO>> GetGroupByTitle([FromRoute] string title, CancellationToken cancellationToken)
         {
-            var result = await _groupService.GetGroupById(id, cancellationToken);
+            var result = await _groupService.GetGroupByTitle(title, cancellationToken);
 
             return Ok(result);
         }
@@ -62,7 +71,7 @@ namespace Schedule_App.API.Controllers
         {
             var result = await _groupService.AddGroup(group, cancellationToken);
 
-            return Created($"groups/{result.Id}", result);
+            return Created($"{BASE_ENDPOINT}/{result.Id}", result);
         }
 
         [HttpPatch("{id:int}")]

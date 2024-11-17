@@ -68,6 +68,20 @@ namespace Schedule_App.API.Services
             return _mapper.Map<GroupReadDTO>(group);
         }
 
+        public async Task<GroupReadDTO> GetGroupByTitle(string title, CancellationToken cancellationToken)
+        {
+            var group = await _repository.GetAllNotDeleted<Group>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(g => g.Title == title);
+
+            if (group is null)
+            {
+                throw new KeyNotFoundException($"Group with Title '{title}' is not found");
+            }
+
+            return _mapper.Map<GroupReadDTO>(group);
+        }
+
         public async Task<GroupReadDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken = default)
         {
             var group = _mapper.Map<Group>(groupCreateDTO);

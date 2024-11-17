@@ -17,6 +17,8 @@ namespace Schedule_App.Core.Interfaces
 
         Task<GroupReadDTO> GetGroupById(int id, CancellationToken cancellationToken);
 
+        Task<GroupReadDTO> GetGroupByTitle(string title, CancellationToken cancellationToken);
+
         Task<GroupReadDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken);
 
         Task<GroupReadDTO> UpdateGroupTitle(int id, string newTitle, CancellationToken cancellationToken);
