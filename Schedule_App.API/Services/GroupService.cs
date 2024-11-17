@@ -81,6 +81,24 @@ namespace Schedule_App.API.Services
             return _mapper.Map<GroupReadDTO>(group);
         }
 
+        public async Task<GroupReadDTO> UpdateGroupTitle(int id, string newTitle, CancellationToken cancellationToken)
+        {
+            var group = await _repository.GetAll<Group>()
+                .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
+
+            if (group is null)
+            {
+                throw new KeyNotFoundException($"Group with ID {id} is not found");
+            }
+
+            group.UpdatedAt = DateTime.UtcNow;
+            group.Title = newTitle;
+
+            await _repository.SaveChanges(cancellationToken);
+
+            return _mapper.Map<GroupReadDTO>(group);
+        }
+
         public async Task DeleteGroup(int id, CancellationToken cancellationToken = default)
         {
             var group = await _repository.GetAll<Group>()

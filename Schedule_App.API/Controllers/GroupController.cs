@@ -65,6 +65,14 @@ namespace Schedule_App.API.Controllers
             return Created($"groups/{result.Id}", result);
         }
 
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult<GroupReadDTO>> UpdateGroupTitle([FromRoute] int id, [FromQuery] string title, CancellationToken cancellationToken)
+        {
+            var result = await _groupService.UpdateGroupTitle(id, title, cancellationToken);
+
+            return Ok(result);
+        }
+
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteGroup(int id, CancellationToken cancellationToken)
         {
