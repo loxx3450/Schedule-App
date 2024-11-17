@@ -5,9 +5,10 @@ using Schedule_App.Core.Interfaces;
 namespace Schedule_App.API.Controllers
 {
     [ApiController]
-    [Route("lessonStatuses")]
+    [Route(BASE_ENDPOINT)]
     public class LessonStatusController : ControllerBase
     {
+        private const string BASE_ENDPOINT = "api/lessonStatuses";
         private readonly ILessonStatusService _lessonStatusService;
 
         public LessonStatusController(ILessonStatusService lessonStatusService)
