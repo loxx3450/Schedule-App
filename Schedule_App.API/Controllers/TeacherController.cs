@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Schedule_App.Core.DTOs.Teacher;
+using Schedule_App.Core.Filters;
 using Schedule_App.Core.Interfaces;
 
 namespace Schedule_App.API.Controllers
@@ -29,42 +30,31 @@ namespace Schedule_App.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<TeacherReadDTO>>> GetTeachersByFilter(
+            [FromQuery] string? username = null,
+            [FromQuery] int? groupId = null,
+            [FromQuery] int? subjectId = null,
+            [FromQuery] int skip = 0,
+            [FromQuery] int take = 20,
+            CancellationToken cancellationToken = default)
+        {
+            var teacherFilter = new TeacherFilter()
+            {
+                Username = username,
+                GroupId = groupId,
+                SubjectId = subjectId,
+            };
+
+            var result = await _teacherService.GetTeachersByFilter(teacherFilter, skip, take, cancellationToken);
+
+            return Ok(result);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<ActionResult<TeacherReadDTO>> GetTeacherById([FromRoute] int id, CancellationToken cancellationToken)
         {
             var result = await _teacherService.GetTeacherById(id, cancellationToken);
-
-            return Ok(result);
-        }
-
-        [HttpGet("search/group/{groupId:int}")]
-        public async Task<ActionResult<IEnumerable<TeacherReadDTO>>> GetTeachersByGroupId(
-            [FromRoute] int groupId,
-            [FromQuery] int skip = 0,
-            [FromQuery] int take = 20,
-            CancellationToken cancellationToken = default)
-        {
-            var result = await _teacherService.GetTeachersByGroupId(groupId, skip, take, cancellationToken);
-
-            return Ok(result);
-        }
-
-        [HttpGet("search/subject/{subjectId:int}")]
-        public async Task<ActionResult<IEnumerable<TeacherReadDTO>>> GetTeachersBySubjectId(
-            [FromRoute] int subjectId,
-            [FromQuery] int skip = 0,
-            [FromQuery] int take = 20,
-            CancellationToken cancellationToken = default)
-        {
-            var result = await _teacherService.GetTeachersBySubjectId(subjectId, skip, take, cancellationToken);
-
-            return Ok(result);
-        }
-
-        [HttpGet("search/username/{username}")]
-        public async Task<ActionResult<TeacherReadDTO>> GetTeacherByUsername([FromRoute] string username, CancellationToken cancellationToken)
-        {
-            var result = await _teacherService.GetTeacherByUsername(username, cancellationToken);
 
             return Ok(result);
         }

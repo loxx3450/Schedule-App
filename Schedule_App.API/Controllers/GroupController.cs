@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Schedule_App.Core.DTOs.Group;
+using Schedule_App.Core.DTOs.GroupTeacher;
+using Schedule_App.Core.Filters;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Core.Models;
 
@@ -17,26 +19,40 @@ namespace Schedule_App.API.Controllers
             _groupService = groupService;
         }
 
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GroupReadDTO>>> GetGroups(
-            [FromQuery] string? title = null, 
             [FromQuery] int skip = 0, 
             [FromQuery] int take = 20, 
             CancellationToken cancellationToken = default)
         {
-            IEnumerable<GroupReadDTO> result = [];
-
-            if (title is null)
-            {
-                result = await _groupService.GetGroups(skip, take, cancellationToken);
-            }
-            else
-            {
-                result = await _groupService.GetGroupsByTitlePattern(title, skip, take, cancellationToken);
-            }
+            var result = await _groupService.GetGroups(skip, take, cancellationToken);
 
             return Ok(result);
         }
+
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<GroupReadDTO>>> GetGroupsByFilter(
+            [FromQuery] string? title = null,
+            [FromQuery] string? titlePattern = null,
+            [FromQuery] int? teacherId = null,
+            [FromQuery] int skip = 0,
+            [FromQuery] int take = 20,
+            CancellationToken cancellationToken = default)
+        {
+            var groupFilter = new GroupFilter()
+            {
+                Title = title,
+                TitlePattern = titlePattern,
+                TeacherId = teacherId,
+            };
+
+            var result = await _groupService.GetGroupsByFilter(groupFilter, skip, take, cancellationToken);
+
+            return Ok(result);
+        }
+
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GroupReadDTO>> GetGroupById([FromRoute] int id, CancellationToken cancellationToken)
@@ -46,25 +62,6 @@ namespace Schedule_App.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("search/teacher/{id:int}")]
-        public async Task<ActionResult<IEnumerable<GroupReadDTO>>> GetGroupsByTeacherId(
-            [FromRoute] int id, 
-            [FromQuery] int skip = 0, 
-            [FromQuery] int take = 20, 
-            CancellationToken cancellationToken = default)
-        {
-            var result = await _groupService.GetGroupsByTeacherId(id, skip, take, cancellationToken);
-
-            return Ok(result);
-        }
-
-        [HttpGet("search/title/{title}")]
-        public async Task<ActionResult<GroupReadDTO>> GetGroupByTitle([FromRoute] string title, CancellationToken cancellationToken)
-        {
-            var result = await _groupService.GetGroupByTitle(title, cancellationToken);
-
-            return Ok(result);
-        }
 
         [HttpPost]
         public async Task<ActionResult<GroupReadDTO>> AddGroup([FromBody] GroupCreateDTO group, CancellationToken cancellationToken)
@@ -74,13 +71,18 @@ namespace Schedule_App.API.Controllers
             return Created($"{BASE_ENDPOINT}/{result.Id}", result);
         }
 
+
         [HttpPatch("{id:int}")]
-        public async Task<ActionResult<GroupReadDTO>> UpdateGroupTitle([FromRoute] int id, [FromQuery] string title, CancellationToken cancellationToken)
+        public async Task<ActionResult<GroupReadDTO>> UpdateGroupTitle(
+            [FromRoute] int id, 
+            [FromQuery] string title, 
+            CancellationToken cancellationToken)
         {
             var result = await _groupService.UpdateGroupTitle(id, title, cancellationToken);
 
             return Ok(result);
         }
+
 
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteGroup(int id, CancellationToken cancellationToken)

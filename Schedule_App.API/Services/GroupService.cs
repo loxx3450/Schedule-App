@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Schedule_App.Core.DTOs.Group;
+using Schedule_App.Core.DTOs.GroupTeacher;
 using Schedule_App.Core.DTOs.Teacher;
+using Schedule_App.Core.Filters;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Core.Models;
 
@@ -29,29 +31,39 @@ namespace Schedule_App.API.Services
             return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
         }
 
-        public async Task<IEnumerable<GroupReadDTO>> GetGroupsByTitlePattern(string title, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GroupReadDTO>> GetGroupsByFilter(GroupFilter groupFilter, int skip, int take, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllNotDeleted<Group>()
-                .AsNoTracking()
-                .Where(g => g.Title.Contains(title))
-                .Skip(skip)
-                .Take(take)
-                .ToArrayAsync(cancellationToken);
+            if (groupFilter.Title is not null)
+            {
+                return [ await GetGroupByTitle(groupFilter.Title, cancellationToken) ];
+            }
 
-            return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
-        }
+            if (groupFilter.TeacherId is not null)
+            {
+                var groups = _repository.GetAllNotDeleted<GroupTeacher>()
+                    .AsNoTracking()
+                    .Where(gt => gt.TeacherId == groupFilter.TeacherId)
+                    .Select(gt => gt.Group);
 
-        public async Task<IEnumerable<GroupReadDTO>> GetGroupsByTeacherId(int id, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
-        {
-            var result = await _repository.GetAllNotDeleted<GroupTeacher>()
-                .AsNoTracking()
-                .Where(gt => gt.TeacherId == id)
-                .Skip(skip)
-                .Take(take)
-                .Select(gt => gt.Group)
-                .ToArrayAsync(cancellationToken);
+                if (groupFilter.TitlePattern is not null)
+                {
+                    groups = groups.Where(g => g.Title.Contains(groupFilter.TitlePattern));
+                }
 
-            return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
+                var result = await groups
+                    .Skip(skip)
+                    .Take(take)
+                    .ToArrayAsync(cancellationToken);
+
+                return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
+            }
+
+            if (groupFilter.TitlePattern is not null)
+            {
+                return await GetGroupsByTitlePattern(groupFilter.TitlePattern, skip, take, cancellationToken);
+            }
+
+            return [];
         }
 
         public async Task<GroupReadDTO> GetGroupById(int id, CancellationToken cancellationToken = default)
@@ -68,11 +80,11 @@ namespace Schedule_App.API.Services
             return _mapper.Map<GroupReadDTO>(group);
         }
 
-        public async Task<GroupReadDTO> GetGroupByTitle(string title, CancellationToken cancellationToken)
+        private async Task<GroupReadDTO> GetGroupByTitle(string title, CancellationToken cancellationToken)
         {
             var group = await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
-                .FirstOrDefaultAsync(g => g.Title == title);
+                .FirstOrDefaultAsync(g => g.Title == title, cancellationToken);
 
             if (group is null)
             {
@@ -80,6 +92,18 @@ namespace Schedule_App.API.Services
             }
 
             return _mapper.Map<GroupReadDTO>(group);
+        }
+
+        private async Task<IEnumerable<GroupReadDTO>> GetGroupsByTitlePattern(string title, int skip, int take, CancellationToken cancellationToken)
+        {
+            var result = await _repository.GetAllNotDeleted<Group>()
+                .AsNoTracking()
+                .Where(g => g.Title.Contains(title))
+                .Skip(skip)
+                .Take(take)
+                .ToArrayAsync(cancellationToken);
+
+            return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
         }
 
         public async Task<GroupReadDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken = default)

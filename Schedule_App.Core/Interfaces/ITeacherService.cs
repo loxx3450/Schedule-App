@@ -1,4 +1,5 @@
 ﻿using Schedule_App.Core.DTOs.Teacher;
+using Schedule_App.Core.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,13 +12,9 @@ namespace Schedule_App.Core.Interfaces
     {
         Task<IEnumerable<TeacherReadDTO>> GetTeachers(int skip, int take, CancellationToken cancellationToken);
 
-        Task<IEnumerable<TeacherReadDTO>> GetTeachersByGroupId(int groupId, int skip, int take, CancellationToken cancellationToken);
-
-        Task<IEnumerable<TeacherReadDTO>> GetTeachersBySubjectId(int subjectId, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<TeacherReadDTO>> GetTeachersByFilter(TeacherFilter filter, int skip, int take, CancellationToken cancellationToken);
 
         Task<TeacherReadDTO> GetTeacherById(int id, CancellationToken cancellationToken);
-
-        Task<TeacherReadDTO> GetTeacherByUsername(string username, CancellationToken cancellationToken);
 
         Task<TeacherReadDTO> AddTeacher(TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken);
 
