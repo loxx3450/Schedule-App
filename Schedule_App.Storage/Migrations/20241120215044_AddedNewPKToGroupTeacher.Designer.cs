@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Schedule_App.Storage;
@@ -11,9 +12,11 @@ using Schedule_App.Storage;
 namespace Schedule_App.Storage.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20241120215044_AddedNewPKToGroupTeacher")]
+    partial class AddedNewPKToGroupTeacher
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,7 @@ namespace Schedule_App.Storage.Migrations
                     b.HasIndex("Title")
                         .IsUnique();
 
-                    b.ToTable("Classrooms", (string)null);
+                    b.ToTable("Classrooms");
                 });
 
             modelBuilder.Entity("Schedule_App.Core.Models.Group", b =>
@@ -82,7 +85,7 @@ namespace Schedule_App.Storage.Migrations
                     b.HasIndex("Title")
                         .IsUnique();
 
-                    b.ToTable("Groups", (string)null);
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("Schedule_App.Core.Models.GroupTeacher", b =>
@@ -114,7 +117,7 @@ namespace Schedule_App.Storage.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("GroupsTeachers", (string)null);
+                    b.ToTable("GroupsTeachers");
                 });
 
             modelBuilder.Entity("Schedule_App.Core.Models.Lesson", b =>
@@ -173,7 +176,7 @@ namespace Schedule_App.Storage.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("Lessons", null, t =>
+                    b.ToTable("Lessons", t =>
                         {
                             t.HasCheckConstraint("CK_Lesson_Time_Range", "\"EndsAt\" > \"StartsAt\"");
                         });
@@ -197,7 +200,7 @@ namespace Schedule_App.Storage.Migrations
                     b.HasIndex("Description")
                         .IsUnique();
 
-                    b.ToTable("LessonStatuses", (string)null);
+                    b.ToTable("LessonStatuses");
                 });
 
             modelBuilder.Entity("Schedule_App.Core.Models.Subject", b =>
@@ -227,7 +230,7 @@ namespace Schedule_App.Storage.Migrations
                     b.HasIndex("Title")
                         .IsUnique();
 
-                    b.ToTable("Subjects", (string)null);
+                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("Schedule_App.Core.Models.Teacher", b =>
@@ -275,7 +278,7 @@ namespace Schedule_App.Storage.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Teachers", (string)null);
+                    b.ToTable("Teachers");
                 });
 
             modelBuilder.Entity("SubjectTeacher", b =>
@@ -290,7 +293,7 @@ namespace Schedule_App.Storage.Migrations
 
                     b.HasIndex("TeachersId");
 
-                    b.ToTable("SubjectTeacher", (string)null);
+                    b.ToTable("SubjectTeacher");
                 });
 
             modelBuilder.Entity("Schedule_App.Core.Models.GroupTeacher", b =>

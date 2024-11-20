@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 
 namespace Schedule_App.Core.Models
 {
-    [PrimaryKey(nameof(GroupId), nameof(TeacherId))]
     public class GroupTeacher : AuditableEntity
     {
+        [Key]
+        public int Id { get; set; }
+
         [Required]
         public int GroupId { get; set; }
         public virtual Group Group { get; set; } = null!;
