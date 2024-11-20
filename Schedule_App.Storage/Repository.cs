@@ -49,9 +49,10 @@ namespace Schedule_App.Storage
         }
 
         // Soft delete
-        public Task Delete<T>(T obj) where T : AuditableEntity
+        public Task DeleteSoft<T>(T obj) where T : AuditableEntity
         {
             obj.DeletedAt = DateTime.UtcNow;
+            obj.UpdatedAt = DateTime.UtcNow;
 
             return Task.CompletedTask;
         }

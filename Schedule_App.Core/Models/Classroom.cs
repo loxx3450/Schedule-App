@@ -13,7 +13,7 @@ namespace Schedule_App.Core.Models
         public short Id { get; set; }
 
         [Required]
-        [MaxLength(10)]
+        [MaxLength(38)]
         public string Title { get; set; } = null!;
 
         public virtual List<Lesson> Lessons { get; set; } = [];

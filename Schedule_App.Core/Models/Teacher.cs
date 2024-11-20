@@ -15,7 +15,7 @@ namespace Schedule_App.Core.Models
 
         
         [Required]
-        [MaxLength(20)]
+        [MaxLength(48)]
         public string Username { get; set; } = null!;
 
         [Required]
