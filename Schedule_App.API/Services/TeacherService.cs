@@ -180,7 +180,12 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Teacher with ID '{id}' is not found"); 
             }
 
-            await _repository.Delete(teacher);
+            // Changing state of timestamp's
+            await _repository.DeleteSoft<Teacher>(teacher);
+
+            // Updating value for Unique Field
+            teacher.Username = $"{teacher.Username}_deleted_{teacher.DeletedAt}";
+
             await _repository.SaveChanges(cancellationToken);
         }
 

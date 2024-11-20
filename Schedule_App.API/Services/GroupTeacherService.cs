@@ -94,7 +94,7 @@ namespace Schedule_App.API.Services
             var groupId = createDTO.GroupId;
             var teacherId = createDTO.TeacherId;
 
-            // Check if such association does not exist yet
+            // Check if such (not deleted) association does not exist yet
             var alreadyExists = await _repository.GetAllNotDeleted<GroupTeacher>()
                 .AnyAsync(gt => gt.GroupId == groupId && gt.TeacherId == teacherId, cancellationToken);
 
@@ -132,7 +132,9 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"GroupTeacher with IDs [{groupId}; {teacherId}] is not found");
             }
 
-            await _repository.Delete<GroupTeacher>(groupTeacher);
+            // Changing state of timestamp's
+            await _repository.DeleteSoft<GroupTeacher>(groupTeacher);
+
             await _repository.SaveChanges(cancellationToken);
         }
     }

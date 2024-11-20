@@ -155,7 +155,11 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Group with ID '{id}' is not found");
             }
 
-            await _repository.Delete<Group>(group);
+            // Changing state of timestamp's
+            await _repository.DeleteSoft<Group>(group);
+
+            // Updating value for Unique Field
+            group.Title = $"{group.Title}_deleted_{group.DeletedAt}";
 
             await _repository.SaveChanges(cancellationToken);
         }
