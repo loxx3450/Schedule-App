@@ -15,13 +15,10 @@ namespace Schedule_App.Core.Interfaces
         IQueryable<T> GetAllNotDeleted<T>()
             where T : AuditableEntity;
 
-        Task<T> Add<T>(T obj, CancellationToken cancellationToken)
-            where T : class;
-
         Task<T> AddAuditableEntity<T>(T obj, CancellationToken cancellationToken = default)
             where T : AuditableEntity;
 
-        Task DeleteSoft<T>(T obj)
+        Task DeleteSoft<T>(T obj, CancellationToken cancellationToken = default)
             where T : AuditableEntity;
 
         Task SaveChanges(CancellationToken cancellationToken);

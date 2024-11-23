@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Moq;
+using Moq.EntityFrameworkCore;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Core.Models;
 using System;
@@ -7,13 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Schedule_App.Storage
+namespace Schedule_App.Tests
 {
-    public class Repository : IRepository
+    public class MockRepository : IRepository
     {
-        private readonly DataContext _context;
+        private readonly DbContext _context;
 
-        public Repository(DataContext context)
+        public MockRepository(DbContext context)
         {
             _context = context;
         }
@@ -35,13 +37,12 @@ namespace Schedule_App.Storage
             obj.UpdatedAt = DateTime.UtcNow;
 
             await _context.Set<T>()
-                .AddAsync(obj, cancellationToken);
+                .AddAsync(obj);
 
             return obj;
         }
 
-        // Soft delete
-        public Task DeleteSoft<T>(T obj, CancellationToken cancellationToken) where T : AuditableEntity
+        public Task DeleteSoft<T>(T obj, CancellationToken cancellationToken = default) where T : AuditableEntity
         {
             obj.DeletedAt = DateTime.UtcNow;
             obj.UpdatedAt = DateTime.UtcNow;
@@ -49,9 +50,9 @@ namespace Schedule_App.Storage
             return Task.CompletedTask;
         }
 
-        public Task SaveChanges(CancellationToken cancellationToken = default)
+        public Task SaveChanges(CancellationToken cancellationToken)
         {
-            return _context.SaveChangesAsync(cancellationToken);
+            return Task.CompletedTask;
         }
     }
 }
