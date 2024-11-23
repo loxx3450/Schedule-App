@@ -31,7 +31,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
         }
 
-        public async Task<IEnumerable<GroupReadDTO>> GetGroupsByFilter(GroupFilter groupFilter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<GroupReadDTO>> GetGroupsByFilter(GroupFilter groupFilter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
         {
             if (groupFilter.Title is not null)
             {
@@ -40,9 +40,16 @@ namespace Schedule_App.API.Services
 
             if (groupFilter.TeacherId is not null)
             {
+                // If teacher does not exist
+                if (! await _repository.GetAllNotDeleted<GroupTeacher>()
+                    .AnyAsync(gt => gt.TeacherId == groupFilter.TeacherId && gt.Teacher.DeletedAt == null))
+                {
+                    throw new ArgumentException($"Teacher with ID '{groupFilter.TeacherId}' is not found");
+                }
+
                 var groups = _repository.GetAllNotDeleted<GroupTeacher>()
                     .AsNoTracking()
-                    .Where(gt => gt.TeacherId == groupFilter.TeacherId)
+                    .Where(gt => gt.TeacherId == groupFilter.TeacherId && gt.Group.DeletedAt == null)
                     .Select(gt => gt.Group);
 
                 if (groupFilter.TitlePattern is not null)
