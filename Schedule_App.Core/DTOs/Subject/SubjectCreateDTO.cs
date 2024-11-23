@@ -11,7 +11,9 @@ namespace Schedule_App.Core.DTOs.Subject
     public class SubjectCreateDTO
     {
         [Required]
-        [MaxLength(30)]
+        [MinLength(5, ErrorMessage = "The Subject's title should contain at least 5 characters.")]
+        [MaxLength(30, ErrorMessage = "The Subject's title should contain no more than 30 characters.")]
+        [RegularExpression(@"^[a-zA-Z ]+$", ErrorMessage = "The Subject's title can only contain letters and spaces.")]
         public string Title { get; set; } = null!;
     }
 }
