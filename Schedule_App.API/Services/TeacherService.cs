@@ -5,7 +5,6 @@ using Schedule_App.Core.DTOs.Teacher;
 using Schedule_App.Core.Filters;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Core.Models;
-using System.Text.RegularExpressions;
 
 namespace Schedule_App.API.Services
 {
@@ -40,6 +39,12 @@ namespace Schedule_App.API.Services
 
             if (filter.GroupId is not null)
             {
+                if (! await _repository.GetAllNotDeleted<Group>().
+                    AnyAsync(g => g.Id == filter.GroupId))
+                {
+                    throw new ArgumentException($"Group with ID '{filter.GroupId}' is not found");
+                }
+
                 var teachers = _repository.GetAllNotDeleted<GroupTeacher>()
                     .AsNoTracking()
                     .Where(gt => gt.GroupId == filter.GroupId)
@@ -57,6 +62,10 @@ namespace Schedule_App.API.Services
                     {
                         var teacherIds = subject.Teachers.Select(teacher => teacher.Id);
                         teachers = teachers.Where(t => teacherIds.Contains(t.Id));
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"Subject with ID '{filter.SubjectId}' is not found");
                     }
                 }
 
@@ -88,6 +97,7 @@ namespace Schedule_App.API.Services
             }
 
             var teachers = subject.Teachers
+                .Where(t => t.DeletedAt == null)
                 .Skip(skip)
                 .Take(take)
                 .ToArray();
