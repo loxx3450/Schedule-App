@@ -21,7 +21,7 @@ namespace Schedule_App.API.Services
 
         public async Task<IEnumerable<GroupTeacherReadDTO>> GetGroupTeacherInfos(int skip, int take, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllNotDeleted<GroupTeacher>()
+            var result = await GetActualGroupTeacherInfos()
                 .AsNoTracking()
                 .Skip(skip)
                 .Take(take)
@@ -32,7 +32,7 @@ namespace Schedule_App.API.Services
 
         public async Task<GroupTeacherReadDTO> GetGroupTeacherInfo(int groupId, int teacherId, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllNotDeleted<GroupTeacher>()
+            var result = await GetActualGroupTeacherInfos()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(gt => gt.GroupId == groupId && gt.TeacherId == teacherId);
 
@@ -41,7 +41,7 @@ namespace Schedule_App.API.Services
 
         public async Task<IEnumerable<GroupTeacherReadDTO>> GetGroupsByTeacherId(int teacherId, int skip, int take, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllNotDeleted<GroupTeacher>()
+            var result = await GetActualGroupTeacherInfos()
                 .AsNoTracking()
                 .Where(gt => gt.TeacherId == teacherId)
                 .Select(gt => new GroupTeacherReadDTO()
@@ -59,7 +59,7 @@ namespace Schedule_App.API.Services
 
         public async Task<IEnumerable<GroupTeacherReadDTO>> GetTeachersByGroupId(int groupId, int skip, int take, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllNotDeleted<GroupTeacher>()
+            var result = await GetActualGroupTeacherInfos()
                 .AsNoTracking()
                 .Where(gt => gt.GroupId == groupId)
                 .Select(gt => new GroupTeacherReadDTO()
@@ -136,6 +136,12 @@ namespace Schedule_App.API.Services
             await _repository.DeleteSoft<GroupTeacher>(groupTeacher);
 
             await _repository.SaveChanges(cancellationToken);
+        }
+
+        private IQueryable<GroupTeacher> GetActualGroupTeacherInfos()
+        {
+            return _repository.GetAll<GroupTeacher>()
+                .Where(gt => gt.Group.DeletedAt == null && gt.Teacher.DeletedAt == null);        // Check if FKs reference to existing objects
         }
     }
 }
