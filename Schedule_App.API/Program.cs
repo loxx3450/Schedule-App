@@ -14,7 +14,10 @@ builder.Services.AddDbContext<DataContext>(opt =>
 
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Repository
 builder.Services.AddScoped<IRepository, Repository>();
+
+// Services
 builder.Services.AddScoped<ILessonStatusService, LessonStatusService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
@@ -24,8 +27,12 @@ builder.Services.AddScoped<ISubjectService, SubjectService>();
 
 builder.Services.AddControllers(opt =>
 {
+    // IExceptionFilter
     opt.Filters.Add(new ExceptionFilter());
+
+    // IActionFilter's
     opt.Filters.Add(new ValidationFilter());
+    opt.Filters.Add(new StandardResponseFilter());
 });
 
 // Turns off automatic Validation Check

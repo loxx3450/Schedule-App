@@ -35,7 +35,10 @@ namespace Schedule_App.API.Filters
                 }
 
                 // Returning custom ObjectResult
-                context.Result = new ObjectResult(response);
+                context.Result = new ObjectResult(response)
+                {
+                    StatusCode = response.StatusCode,
+                };
             }
         }
 
