@@ -168,7 +168,22 @@ namespace Schedule_App.API.Services
             // Updating value for Unique Field
             group.Title = $"{group.Title}_deleted_{group.DeletedAt}";
 
+            // Soft Delete all records, that are associated with this Group
+            await DeleteAssociationsWithTeachers(id);
+
             await _repository.SaveChanges(cancellationToken);
+        }
+
+        private async Task DeleteAssociationsWithTeachers(int groupId)
+        {
+            var groupTeacherInfos = await _repository.GetAllNotDeleted<GroupTeacher>()
+                .Where(gt => gt.GroupId == groupId)
+                .ToArrayAsync();
+
+            foreach (var info in groupTeacherInfos)
+            {
+                await _repository.DeleteSoft<GroupTeacher>(info);
+            }
         }
 
         private Task<bool> IsTitleTaken(string title, CancellationToken cancellationToken)

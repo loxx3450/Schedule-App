@@ -57,7 +57,7 @@ namespace Schedule_App.API.Controllers
         {
             await _groupTeacherService.AddTeacherToGroup(createDTO, cancellationToken);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete]
@@ -68,7 +68,7 @@ namespace Schedule_App.API.Controllers
         {
             await _groupTeacherService.RemoveTeacherFromGroup(groupId, teacherId, cancellationToken);
 
-            return Ok();
+            return NoContent();
         }
     }
 }
