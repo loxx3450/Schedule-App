@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Schedule_App.API.DTOs.LessonStatus;
+using Schedule_App.Core.DTOs.Classroom;
 using Schedule_App.Core.DTOs.Group;
 using Schedule_App.Core.DTOs.GroupTeacher;
 using Schedule_App.Core.DTOs.Subject;
@@ -25,6 +26,9 @@ namespace Schedule_App.API
 
             CreateMap<Subject, SubjectReadDTO>().ReverseMap();
             CreateMap<Subject, SubjectCreateDTO>().ReverseMap();
+
+            CreateMap<Classroom, ClassroomReadDTO>().ReverseMap();
+            CreateMap<Classroom, ClassroomCreateDTO>().ReverseMap();
         }
     }
 }

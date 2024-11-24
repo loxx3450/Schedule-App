@@ -59,7 +59,7 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<SubjectReadDTO>> AddGroup([FromBody] SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken)
+        public async Task<ActionResult<SubjectReadDTO>> AddSubject([FromBody] SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken)
         {
             var result = await _subjectService.AddSubject(subjectCreateDTO, cancellationToken);
 
