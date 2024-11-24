@@ -19,7 +19,7 @@ namespace Schedule_App.Core.Interfaces
 
         Task<SubjectReadDTO> AddSubject(SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken);
 
-        Task<SubjectReadDTO> UpdateSubjectTitle(int id, string newTitle, CancellationToken cancellationToken);
+        Task<SubjectReadDTO> UpdateSubjectTitle(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken);
 
         Task DeleteSubject(int id, CancellationToken cancellationToken);
     }

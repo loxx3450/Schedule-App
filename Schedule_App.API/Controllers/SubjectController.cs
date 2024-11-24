@@ -69,10 +69,10 @@ namespace Schedule_App.API.Controllers
         [HttpPut("{id:int}")]
         public async Task<ActionResult<SubjectReadDTO>> UpdateSubjectTitle(
             [FromRoute] int id,
-            [FromQuery] string title,
+            [FromBody] SubjectUpdateDTO subjectUpdateDTO,
             CancellationToken cancellationToken)
         {
-            var result = await _subjectService.UpdateSubjectTitle(id, title, cancellationToken);
+            var result = await _subjectService.UpdateSubjectTitle(id, subjectUpdateDTO, cancellationToken);
 
             return Ok(result);
         }

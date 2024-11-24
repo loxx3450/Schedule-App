@@ -106,7 +106,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<SubjectReadDTO>(subject);
         }
 
-        public async Task<SubjectReadDTO> UpdateSubjectTitle(int id, string newTitle, CancellationToken cancellationToken = default)
+        public async Task<SubjectReadDTO> UpdateSubjectTitle(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken = default)
         {
             var subject = await _repository.GetAllNotDeleted<Subject>()
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
@@ -117,12 +117,12 @@ namespace Schedule_App.API.Services
             }
 
             // if title is already taken
-            if (await IsTitleTaken(newTitle, cancellationToken))
+            if (await IsTitleTaken(subjectUpdateDTO.Title, cancellationToken))
             {
-                throw new ArgumentException($"Subject with Title '{newTitle}' already exists");
+                throw new ArgumentException($"Subject with Title '{subjectUpdateDTO.Title}' already exists");
             }
 
-            subject.Title = newTitle;
+            subject.Title = subjectUpdateDTO.Title;
 
             subject.UpdatedAt = DateTime.UtcNow;
 

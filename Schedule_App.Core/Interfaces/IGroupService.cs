@@ -19,7 +19,7 @@ namespace Schedule_App.Core.Interfaces
 
         Task<GroupReadDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken);
 
-        Task<GroupReadDTO> UpdateGroupTitle(int id, string newTitle, CancellationToken cancellationToken);
+        Task<GroupReadDTO> UpdateGroupTitle(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken);
 
         Task DeleteGroup(int id, CancellationToken cancellationToken);
     }

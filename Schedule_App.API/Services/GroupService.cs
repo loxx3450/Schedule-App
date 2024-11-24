@@ -129,7 +129,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<GroupReadDTO>(group);
         }
 
-        public async Task<GroupReadDTO> UpdateGroupTitle(int id, string newTitle, CancellationToken cancellationToken)
+        public async Task<GroupReadDTO> UpdateGroupTitle(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken)
         {
             var group = await _repository.GetAll<Group>()
                 .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
@@ -139,12 +139,12 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Group with ID '{id}' is not found");
             }
 
-            if (await IsTitleTaken(newTitle, cancellationToken))
+            if (await IsTitleTaken(groupUpdateDTO.Title, cancellationToken))
             {
-                throw new ArgumentException($"Group with Title '{newTitle}' already exists");
+                throw new ArgumentException($"Group with Title '{groupUpdateDTO.Title}' already exists");
             }
 
-            group.Title = newTitle;
+            group.Title = groupUpdateDTO.Title;
             group.UpdatedAt = DateTime.UtcNow;
 
             await _repository.SaveChanges(cancellationToken);

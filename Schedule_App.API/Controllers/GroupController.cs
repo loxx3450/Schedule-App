@@ -75,10 +75,10 @@ namespace Schedule_App.API.Controllers
         [HttpPatch("{id:int}")]
         public async Task<ActionResult<GroupReadDTO>> UpdateGroupTitle(
             [FromRoute] int id, 
-            [FromQuery] string title, 
+            [FromBody] GroupUpdateDTO groupUpdateDTO, 
             CancellationToken cancellationToken)
         {
-            var result = await _groupService.UpdateGroupTitle(id, title, cancellationToken);
+            var result = await _groupService.UpdateGroupTitle(id, groupUpdateDTO, cancellationToken);
 
             return Ok(result);
         }
