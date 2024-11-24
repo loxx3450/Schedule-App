@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Schedule_App.API;
+using Schedule_App.API.Filters;
 using Schedule_App.API.Services;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Storage;
@@ -23,6 +25,13 @@ builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddControllers(opt =>
 {
     opt.Filters.Add(new ExceptionFilter());
+    opt.Filters.Add(new ValidationFilter());
+});
+
+// Turns off automatic Validation Check
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
