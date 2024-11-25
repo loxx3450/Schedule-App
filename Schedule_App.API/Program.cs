@@ -26,6 +26,7 @@ builder.Services.AddScoped<ITeacherSubjectService, TeacherSubjectService>();
 builder.Services.AddScoped<IGroupTeacherService, GroupTeacherService>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
+builder.Services.AddScoped<ILessonService, LessonService>();
 
 builder.Services.AddControllers(opt =>
 {

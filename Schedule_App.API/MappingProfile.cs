@@ -3,6 +3,7 @@ using Schedule_App.API.DTOs.LessonStatus;
 using Schedule_App.Core.DTOs.Classroom;
 using Schedule_App.Core.DTOs.Group;
 using Schedule_App.Core.DTOs.GroupTeacher;
+using Schedule_App.Core.DTOs.Lesson;
 using Schedule_App.Core.DTOs.Subject;
 using Schedule_App.Core.DTOs.Teacher;
 using Schedule_App.Core.Models;
@@ -33,6 +34,9 @@ namespace Schedule_App.API
             CreateMap<Classroom, ClassroomReadSummaryDTO>().ReverseMap();
             CreateMap<Classroom, ClassroomReadFullDTO>().ReverseMap();
             CreateMap<Classroom, ClassroomCreateDTO>().ReverseMap();
+
+            CreateMap<Lesson, LessonReadSummaryDTO>().ReverseMap();
+            CreateMap<Lesson, LessonReadFullDTO>().ReverseMap();
         }
     }
 }
