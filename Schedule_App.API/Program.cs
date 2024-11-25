@@ -5,6 +5,7 @@ using Schedule_App.API.Filters;
 using Schedule_App.API.Services;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Storage;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,7 @@ builder.Services.AddControllers(opt =>
     // IActionFilter's
     opt.Filters.Add(new ValidationFilter());
     opt.Filters.Add(new StandardResponseFilter());
+
 });
 
 // Turns off automatic Validation Check
@@ -44,7 +46,16 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Swagger: DateOnly properties should be provided as strings
+builder.Services.AddSwaggerGen(opt =>
+{
+    opt.MapType<DateOnly>(() => new OpenApiSchema()
+    {
+        Type = "string",
+        Format = "date"
+    });
+});
 
 var app = builder.Build();
 
