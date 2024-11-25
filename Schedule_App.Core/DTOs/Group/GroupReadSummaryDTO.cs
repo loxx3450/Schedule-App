@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Schedule_App.Core.DTOs.Classroom
+namespace Schedule_App.Core.DTOs.Group
 {
-    public class ClassroomReadDTO
+    public class GroupReadSummaryDTO
     {
-        public short Id { get; set; }
+        public int Id { get; set; }
 
         public string Title { get; set; } = null!;
     }

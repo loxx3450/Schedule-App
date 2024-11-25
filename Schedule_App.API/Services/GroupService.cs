@@ -20,18 +20,44 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<GroupReadDTO>> GetGroups(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummaries(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
         {
-            var result = await _repository.GetAllNotDeleted<Group>()
+            var groups = await GetGroups(skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<GroupReadSummaryDTO>>(groups);
+        }
+
+        public async Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetails(int skip, int take, CancellationToken cancellationToken)
+        {
+            var groups = await GetGroups(skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<GroupReadFullDTO>>(groups);
+        }
+
+        private async Task<IEnumerable<Group>> GetGroups(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        {
+            return await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
                 .Skip(skip)
                 .Take(take)
                 .ToArrayAsync(cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
         }
 
-        public async Task<IEnumerable<GroupReadDTO>> GetGroupsByFilter(GroupFilter groupFilter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummariesByFilter(GroupFilter groupFilter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        {
+            var groups = await GetGroupsByFilter(groupFilter, skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<GroupReadSummaryDTO>>(groups);
+        }
+
+        public async Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetailsByFilter(GroupFilter groupFilter, int skip, int take, CancellationToken cancellationToken)
+        {
+            var groups = await GetGroupsByFilter(groupFilter, skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<GroupReadFullDTO>>(groups);
+        }
+
+        private async Task<IEnumerable<Group>> GetGroupsByFilter(GroupFilter groupFilter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
         {
             if (groupFilter.Title is not null)
             {
@@ -41,7 +67,7 @@ namespace Schedule_App.API.Services
             if (groupFilter.TeacherId is not null)
             {
                 // If teacher does not exist
-                if (! await _repository.GetAllNotDeleted<GroupTeacher>()
+                if (!await _repository.GetAllNotDeleted<GroupTeacher>()
                     .AnyAsync(gt => gt.TeacherId == groupFilter.TeacherId && gt.Teacher.DeletedAt == null))
                 {
                     throw new ArgumentException($"Teacher with ID '{groupFilter.TeacherId}' is not found");
@@ -57,12 +83,10 @@ namespace Schedule_App.API.Services
                     groups = groups.Where(g => g.Title.Contains(groupFilter.TitlePattern));
                 }
 
-                var result = await groups
+                return await groups
                     .Skip(skip)
                     .Take(take)
                     .ToArrayAsync(cancellationToken);
-
-                return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
             }
 
             if (groupFilter.TitlePattern is not null)
@@ -73,7 +97,21 @@ namespace Schedule_App.API.Services
             return [];
         }
 
-        public async Task<GroupReadDTO> GetGroupById(int id, CancellationToken cancellationToken = default)
+        public async Task<GroupReadSummaryDTO> GetGroupSummaryById(int id, CancellationToken cancellationToken = default)
+        {
+            var group = await GetGroupById(id, cancellationToken);
+
+            return _mapper.Map<GroupReadSummaryDTO>(group);
+        }
+
+        public async Task<GroupReadFullDTO> GetGroupDetailsById(int id, CancellationToken cancellationToken = default)
+        {
+            var group = await GetGroupById(id, cancellationToken);
+
+            return _mapper.Map<GroupReadFullDTO>(group);
+        }
+
+        private async Task<Group> GetGroupById(int id, CancellationToken cancellationToken)
         {
             var group = await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
@@ -84,10 +122,10 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Group with ID '{id}' is not found");
             }
 
-            return _mapper.Map<GroupReadDTO>(group);
+            return group;
         }
 
-        private async Task<GroupReadDTO> GetGroupByTitle(string title, CancellationToken cancellationToken)
+        private async Task<Group> GetGroupByTitle(string title, CancellationToken cancellationToken)
         {
             var group = await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
@@ -98,22 +136,20 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Group with Title '{title}' is not found");
             }
 
-            return _mapper.Map<GroupReadDTO>(group);
+            return group;
         }
 
-        private async Task<IEnumerable<GroupReadDTO>> GetGroupsByTitlePattern(string title, int skip, int take, CancellationToken cancellationToken)
+        private async Task<IEnumerable<Group>> GetGroupsByTitlePattern(string title, int skip, int take, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllNotDeleted<Group>()
+            return await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
                 .Where(g => g.Title.Contains(title))
                 .Skip(skip)
                 .Take(take)
                 .ToArrayAsync(cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupReadDTO>>(result);
         }
 
-        public async Task<GroupReadDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken = default)
+        public async Task<GroupReadSummaryDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken = default)
         {
             var group = _mapper.Map<Group>(groupCreateDTO);
 
@@ -126,10 +162,10 @@ namespace Schedule_App.API.Services
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<GroupReadDTO>(group);
+            return _mapper.Map<GroupReadSummaryDTO>(group);
         }
 
-        public async Task<GroupReadDTO> UpdateGroupTitle(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken)
+        public async Task<GroupReadSummaryDTO> UpdateGroupTitle(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken)
         {
             var group = await _repository.GetAll<Group>()
                 .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
@@ -149,7 +185,7 @@ namespace Schedule_App.API.Services
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<GroupReadDTO>(group);
+            return _mapper.Map<GroupReadSummaryDTO>(group);
         }
 
         public async Task DeleteGroup(int id, CancellationToken cancellationToken = default)

@@ -20,21 +20,32 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ClassroomReadDTO>>> GetClassrooms(
+        public async Task<ActionResult<IEnumerable<ClassroomReadSummaryDTO>>> GetClassrooms(
             [FromQuery] int skip = 0,
             [FromQuery] int take = 20,
+            [FromQuery] bool withDetails = false,
             CancellationToken cancellationToken = default)
         {
-            var classrooms = await _classroomService.GetClassrooms(skip, take, cancellationToken);
+            IEnumerable<ClassroomReadSummaryDTO> classrooms;
+
+            if (withDetails)
+            {
+                classrooms = await _classroomService.GetClassroomsDetails(skip, take, cancellationToken);
+            }
+            else
+            {
+                classrooms = await _classroomService.GetClassroomsSummaries(skip, take, cancellationToken);
+            }
 
             return Ok(classrooms);
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<ClassroomReadDTO>>> GetClassroomsByFilter(
+        public async Task<ActionResult<IEnumerable<ClassroomReadSummaryDTO>>> GetClassroomsByFilter(
             [FromQuery] string? title = null,
             [FromQuery] int skip = 0,
             [FromQuery] int take = 20,
+            [FromQuery] bool withDetails = false,
             CancellationToken cancellationToken = default)
         {
             var classroomFilter = new ClassroomFilter()
@@ -42,21 +53,42 @@ namespace Schedule_App.API.Controllers
                 Title = title,
             };
 
-            var classrooms = await _classroomService.GetClassroomsByFilter(classroomFilter, skip, take, cancellationToken);
+            IEnumerable<ClassroomReadSummaryDTO> classrooms;
+
+            if (withDetails)
+            {
+                classrooms = await _classroomService.GetClassroomsDetailsByFilter(classroomFilter, skip, take, cancellationToken);
+            }
+            else
+            {
+                classrooms = await _classroomService.GetClassroomsSummariesByFilter(classroomFilter, skip, take, cancellationToken);
+            }
 
             return Ok(classrooms);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ClassroomReadDTO>> GetClassroomById([FromRoute] int id, CancellationToken cancellationToken)
+        public async Task<ActionResult<ClassroomReadSummaryDTO>> GetClassroomById(
+            [FromRoute] int id,
+            [FromQuery] bool withDetails = false, 
+            CancellationToken cancellationToken = default)
         {
-            var classroom = await _classroomService.GetClassroomById(id, cancellationToken);
+            ClassroomReadSummaryDTO classroom;
+
+            if (withDetails)
+            {
+                classroom = await _classroomService.GetClassroomDetailsById(id, cancellationToken);
+            }
+            else
+            {
+                classroom = await _classroomService.GetClassroomSummaryById(id, cancellationToken);
+            }
 
             return Ok(classroom);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ClassroomReadDTO>> AddClassroom([FromBody] ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken)
+        public async Task<ActionResult<ClassroomReadSummaryDTO>> AddClassroom([FromBody] ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken)
         {
             var classroom = await _classroomService.AddClassroom(classroomCreateDTO, cancellationToken);
 

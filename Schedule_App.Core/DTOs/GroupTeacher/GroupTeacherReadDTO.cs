@@ -12,10 +12,10 @@ namespace Schedule_App.Core.DTOs.GroupTeacher
     public class GroupTeacherReadDTO
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public GroupReadDTO? Group { get; set; } = null;
+        public GroupReadSummaryDTO? Group { get; set; } = null;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TeacherReadDTO? Teacher { get; set; } = null;
+        public TeacherReadSummaryDTO? Teacher { get; set; } = null;
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

@@ -19,18 +19,44 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TeacherReadDTO>> GetTeachers(int skip = 0, int take = 10, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TeacherReadSummaryDTO>> GetTeachersSummaries(int skip, int take, CancellationToken cancellationToken)
         {
-            var teachers = await _repository.GetAllNotDeleted<Teacher>()
+            var teachers = await GetTeachers(skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<TeacherReadSummaryDTO>>(teachers);
+        }
+
+        public async Task<IEnumerable<TeacherReadFullDTO>> GetTeachersDetails(int skip, int take, CancellationToken cancellationToken)
+        {
+            var teachers = await GetTeachers(skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<TeacherReadFullDTO>>(teachers);
+        }
+
+        private Task<Teacher[]> GetTeachers(int skip = 0, int take = 10, CancellationToken cancellationToken = default)
+        {
+            return _repository.GetAllNotDeleted<Teacher>()
                 .AsNoTracking()
                 .Skip(skip)
                 .Take(take)
                 .ToArrayAsync(cancellationToken);
-
-            return _mapper.Map<IEnumerable<TeacherReadDTO>>(teachers);
         }
 
-        public async Task<IEnumerable<TeacherReadDTO>> GetTeachersByFilter(TeacherFilter filter, int skip = 0, int take = 10, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TeacherReadSummaryDTO>> GetTeachersSummariesByFilter(TeacherFilter filter, int skip, int take, CancellationToken cancellationToken)
+        {
+            var teachers = await GetTeachersByFilter(filter, skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<TeacherReadSummaryDTO>>(teachers);
+        }
+
+        public async Task<IEnumerable<TeacherReadFullDTO>> GetTeachersDetailsByFilter(TeacherFilter filter, int skip, int take, CancellationToken cancellationToken)
+        {
+            var teachers = await GetTeachersByFilter(filter, skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<TeacherReadFullDTO>>(teachers);
+        }
+
+        private async Task<Teacher[]> GetTeachersByFilter(TeacherFilter filter, int skip = 0, int take = 10, CancellationToken cancellationToken = default)
         {
             if (filter.Username is not null)
             {
@@ -69,11 +95,9 @@ namespace Schedule_App.API.Services
                     }
                 }
 
-                var result = await teachers.Skip(skip)
+                return await teachers.Skip(skip)
                     .Take(take)
                     .ToArrayAsync(cancellationToken);
-
-                return _mapper.Map<IEnumerable<TeacherReadDTO>>(result);
             }
 
             if (filter.SubjectId is not null)
@@ -84,7 +108,7 @@ namespace Schedule_App.API.Services
             return [];
         }
 
-        private async Task<IEnumerable<TeacherReadDTO>> GetTeachersBySubjectId(int subjectId, int skip, int take, CancellationToken cancellationToken)
+        private async Task<Teacher[]> GetTeachersBySubjectId(int subjectId, int skip, int take, CancellationToken cancellationToken)
         {
             var subject = await _repository.GetAllNotDeleted<Subject>()
                 .AsNoTracking()
@@ -96,16 +120,28 @@ namespace Schedule_App.API.Services
                 return [];
             }
 
-            var teachers = subject.Teachers
+            return subject.Teachers
                 .Where(t => t.DeletedAt == null)
                 .Skip(skip)
                 .Take(take)
                 .ToArray();
-
-            return _mapper.Map<IEnumerable<TeacherReadDTO>>(teachers);
         }
 
-        public async Task<TeacherReadDTO> GetTeacherById(int id, CancellationToken cancellationToken = default)
+        public async Task<TeacherReadSummaryDTO> GetTeacherSummaryById(int id, CancellationToken cancellationToken)
+        {
+            var teacher = await GetTeacherById(id, cancellationToken);
+
+            return _mapper.Map<TeacherReadSummaryDTO>(teacher);
+        }
+
+        public async Task<TeacherReadFullDTO> GetTeacherDetailsById(int id, CancellationToken cancellationToken)
+        {
+            var teacher = await GetTeacherById(id, cancellationToken);
+
+            return _mapper.Map<TeacherReadFullDTO>(teacher);
+        }
+
+        private async Task<Teacher> GetTeacherById(int id, CancellationToken cancellationToken = default)
         {
             var teacher = await FindTeacherById(id, cancellationToken);
 
@@ -114,10 +150,10 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Teacher with ID '{id}' is not found");
             }
 
-            return _mapper.Map<TeacherReadDTO>(teacher);
+            return teacher;
         }
 
-        private async Task<TeacherReadDTO> GetTeacherByUsername(string username, CancellationToken cancellationToken = default)
+        private async Task<Teacher> GetTeacherByUsername(string username, CancellationToken cancellationToken = default)
         {
             var teacher = await _repository.GetAllNotDeleted<Teacher>()
                 .AsNoTracking()
@@ -128,11 +164,11 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Teacher with Username '{username}' is not found");
             }
 
-            return _mapper.Map<TeacherReadDTO>(teacher);
+            return teacher;
         }
 
         // TODO: add hashing
-        public async Task<TeacherReadDTO> AddTeacher(TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken = default)
+        public async Task<TeacherReadSummaryDTO> AddTeacher(TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken = default)
         {
             // if username is already taken
             if (await IsUsernameTaken(teacherCreateDTO.Username, cancellationToken))
@@ -146,10 +182,10 @@ namespace Schedule_App.API.Services
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<TeacherReadDTO>(teacher);
+            return _mapper.Map<TeacherReadSummaryDTO>(teacher);
         }
 
-        public async Task<TeacherReadDTO> UpdateTeacher(int id, TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken = default)
+        public async Task<TeacherReadSummaryDTO> UpdateTeacher(int id, TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken = default)
         {
             var teacher = await FindTeacherById(id, cancellationToken);
 
@@ -178,7 +214,7 @@ namespace Schedule_App.API.Services
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<TeacherReadDTO>(teacher);
+            return _mapper.Map<TeacherReadSummaryDTO>(teacher);
         }
 
         public async Task DeleteTeacher(int id, CancellationToken cancellationToken = default)

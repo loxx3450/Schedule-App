@@ -19,18 +19,44 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ClassroomReadDTO>> GetClassrooms(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummaries(int skip, int take, CancellationToken cancellationToken)
         {
-            var classrooms = await _repository.GetAllNotDeleted<Classroom>()
+            var classrooms = await GetClassrooms(skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<ClassroomReadSummaryDTO>>(classrooms);
+        }
+
+        public async Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetails(int skip, int take, CancellationToken cancellationToken)
+        {
+            var classrooms = await GetClassrooms(skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<ClassroomReadFullDTO>>(classrooms);
+        }
+
+        private Task<Classroom[]> GetClassrooms(int skip, int take, CancellationToken cancellationToken)
+        {
+            return _repository.GetAllNotDeleted<Classroom>()
                 .AsNoTracking()
                 .Skip(skip)
                 .Take(take)
                 .ToArrayAsync();
-
-            return _mapper.Map<IEnumerable<ClassroomReadDTO>>(classrooms);
         }
 
-        public async Task<IEnumerable<ClassroomReadDTO>> GetClassroomsByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummariesByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken)
+        {
+            var classrooms = await GetClassroomsByFilter(filter, skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<ClassroomReadSummaryDTO>>(classrooms);
+        }
+
+        public async Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailsByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken)
+        {
+            var classrooms = await GetClassroomsByFilter(filter, skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<ClassroomReadFullDTO>>(classrooms);
+        }
+
+        private async Task<Classroom[]> GetClassroomsByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken)
         {
             if (filter.Title is not null)
             {
@@ -40,7 +66,21 @@ namespace Schedule_App.API.Services
             return [];
         }
 
-        public async Task<ClassroomReadDTO> GetClassroomById(int id, CancellationToken cancellationToken)
+        public async Task<ClassroomReadSummaryDTO> GetClassroomSummaryById(int id, CancellationToken cancellationToken)
+        {
+            var classroom = await GetClassroomById(id, cancellationToken);
+
+            return _mapper.Map<ClassroomReadSummaryDTO>(classroom);
+        }
+
+        public async Task<ClassroomReadFullDTO> GetClassroomDetailsById(int id, CancellationToken cancellationToken)
+        {
+            var classroom = await GetClassroomById(id, cancellationToken);
+
+            return _mapper.Map<ClassroomReadFullDTO>(classroom);
+        }
+
+        private async Task<Classroom> GetClassroomById(int id, CancellationToken cancellationToken)
         {
             var classroom = await _repository.GetAllNotDeleted<Classroom>()
                 .AsNoTracking()
@@ -51,10 +91,10 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Classroom with ID '{id}' is not found");
             }
 
-            return _mapper.Map<ClassroomReadDTO>(classroom);
+            return classroom;
         }
 
-        private async Task<ClassroomReadDTO> GetClassroomByTitle(string title, CancellationToken cancellationToken)
+        private async Task<Classroom> GetClassroomByTitle(string title, CancellationToken cancellationToken)
         {
             var classroom = await _repository.GetAllNotDeleted<Classroom>()
                 .AsNoTracking()
@@ -65,10 +105,10 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Classroom with Title '{title}' is not found");
             }
 
-            return _mapper.Map<ClassroomReadDTO>(classroom);
+            return classroom;
         }
 
-        public async Task<ClassroomReadDTO> AddClassroom(ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken)
+        public async Task<ClassroomReadSummaryDTO> AddClassroom(ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken)
         {
             if (await IsTitleTaken(classroomCreateDTO.Title, cancellationToken))
             {
@@ -80,7 +120,7 @@ namespace Schedule_App.API.Services
             await _repository.AddAuditableEntity<Classroom>(classroom);
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<ClassroomReadDTO>(classroom);
+            return _mapper.Map<ClassroomReadSummaryDTO>(classroom);
         }
 
         public async Task DeleteClassroom(int id, CancellationToken cancellationToken)

@@ -20,23 +20,34 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TeacherReadDTO>>> GetTeachers(
+        public async Task<ActionResult<IEnumerable<TeacherReadSummaryDTO>>> GetTeachers(
             [FromQuery] int skip = 0, 
-            [FromQuery] int take = 20, 
+            [FromQuery] int take = 20,
+            [FromQuery] bool withDetails = false,
             CancellationToken cancellationToken = default)
         {
-            var result = await _teacherService.GetTeachers(skip, take, cancellationToken);
+            IEnumerable<TeacherReadSummaryDTO> teachers;
 
-            return Ok(result);
+            if (withDetails)
+            {
+                teachers = await _teacherService.GetTeachersDetails(skip, take, cancellationToken);
+            }
+            else
+            {
+                teachers = await _teacherService.GetTeachersSummaries(skip, take, cancellationToken);
+            }
+
+            return Ok(teachers);
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<TeacherReadDTO>>> GetTeachersByFilter(
+        public async Task<ActionResult<IEnumerable<TeacherReadSummaryDTO>>> GetTeachersByFilter(
             [FromQuery] string? username = null,
             [FromQuery] int? groupId = null,
             [FromQuery] int? subjectId = null,
             [FromQuery] int skip = 0,
             [FromQuery] int take = 20,
+            [FromQuery] bool withDetails = false,
             CancellationToken cancellationToken = default)
         {
             var teacherFilter = new TeacherFilter()
@@ -46,21 +57,42 @@ namespace Schedule_App.API.Controllers
                 SubjectId = subjectId,
             };
 
-            var result = await _teacherService.GetTeachersByFilter(teacherFilter, skip, take, cancellationToken);
+            IEnumerable<TeacherReadSummaryDTO> teachers;
 
-            return Ok(result);
+            if (withDetails)
+            {
+                teachers = await _teacherService.GetTeachersDetailsByFilter(teacherFilter, skip, take, cancellationToken);
+            }
+            else
+            {
+                teachers = await _teacherService.GetTeachersSummariesByFilter(teacherFilter, skip, take, cancellationToken);
+            }
+
+            return Ok(teachers);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<TeacherReadDTO>> GetTeacherById([FromRoute] int id, CancellationToken cancellationToken)
+        public async Task<ActionResult<TeacherReadSummaryDTO>> GetTeacherById(
+            [FromRoute] int id,
+            [FromQuery] bool withDetails = false,
+            CancellationToken cancellationToken = default)
         {
-            var result = await _teacherService.GetTeacherById(id, cancellationToken);
+            TeacherReadSummaryDTO teacher;
 
-            return Ok(result);
+            if (withDetails)
+            {
+                teacher = await _teacherService.GetTeacherDetailsById(id, cancellationToken);
+            }
+            else
+            {
+                teacher = await _teacherService.GetTeacherSummaryById(id, cancellationToken);
+            }
+
+            return Ok(teacher);
         }
 
         [HttpPost]
-        public async Task<ActionResult<TeacherReadDTO>> AddTeacher([FromBody] TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken)
+        public async Task<ActionResult<TeacherReadSummaryDTO>> AddTeacher([FromBody] TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken)
         {
             var result = await _teacherService.AddTeacher(teacherCreateDTO, cancellationToken);
 
@@ -76,7 +108,7 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpPatch("{id:int}")]
-        public async Task<ActionResult<TeacherReadDTO>> UpdateTeacher([FromRoute] int id, [FromBody] TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken)
+        public async Task<ActionResult<TeacherReadSummaryDTO>> UpdateTeacher([FromRoute] int id, [FromBody] TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken)
         {
             var result = await _teacherService.UpdateTeacher(id, teacherUpdateDTO, cancellationToken);
 

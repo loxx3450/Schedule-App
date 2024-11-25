@@ -11,15 +11,18 @@ namespace Schedule_App.Core.Interfaces
 {
     public interface IGroupService
     {
-        Task<IEnumerable<GroupReadDTO>> GetGroups(int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummaries(int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetails(int skip, int take, CancellationToken cancellationToken);
 
-        Task<IEnumerable<GroupReadDTO>> GetGroupsByFilter(GroupFilter groupFilter, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummariesByFilter(GroupFilter groupFilter, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetailsByFilter(GroupFilter groupFilter, int skip, int take, CancellationToken cancellationToken);
 
-        Task<GroupReadDTO> GetGroupById(int id, CancellationToken cancellationToken);
+        Task<GroupReadSummaryDTO> GetGroupSummaryById(int id, CancellationToken cancellationToken);
+        Task<GroupReadFullDTO> GetGroupDetailsById(int id, CancellationToken cancellationToken);
 
-        Task<GroupReadDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken);
+        Task<GroupReadSummaryDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken);
 
-        Task<GroupReadDTO> UpdateGroupTitle(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken);
+        Task<GroupReadSummaryDTO> UpdateGroupTitle(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken);
 
         Task DeleteGroup(int id, CancellationToken cancellationToken);
     }

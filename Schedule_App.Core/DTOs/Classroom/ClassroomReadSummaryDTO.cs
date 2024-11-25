@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Schedule_App.Core.DTOs.Subject
+namespace Schedule_App.Core.DTOs.Classroom
 {
-    public class SubjectReadDTO
+    public class ClassroomReadSummaryDTO
     {
         public short Id { get; set; }
 

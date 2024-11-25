@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Schedule_App.Core.DTOs.Teacher
 {
-    public class TeacherReadDTO
+    public class TeacherReadSummaryDTO
     {
         public int Id { get; set; }
 

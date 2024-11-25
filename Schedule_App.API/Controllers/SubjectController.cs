@@ -21,22 +21,33 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SubjectReadDTO>>> GetSubjects(
+        public async Task<ActionResult<IEnumerable<SubjectReadSummaryDTO>>> GetSubjects(
             [FromQuery] int skip = 0,
             [FromQuery] int take = 20,
+            [FromQuery] bool withDetails = false,
             CancellationToken cancellationToken = default)
         {
-            var result = await _subjectService.GetSubjects(skip, take, cancellationToken);
+            IEnumerable<SubjectReadSummaryDTO> subjects;
 
-            return Ok(result);
+            if (withDetails)
+            {
+                subjects = await _subjectService.GetSubjectsDetails(skip, take, cancellationToken);
+            }
+            else
+            {
+                subjects = await _subjectService.GetSubjectsSummaries(skip, take, cancellationToken);
+            }
+
+            return Ok(subjects);
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<SubjectReadDTO>>> GetSubjectsByFilter(
+        public async Task<ActionResult<IEnumerable<SubjectReadSummaryDTO>>> GetSubjectsByFilter(
             [FromQuery] string? title = null,
             [FromQuery] int? teacherId = null,
             [FromQuery] int skip = 0,
             [FromQuery] int take = 20,
+            [FromQuery] bool withDetails = false,
             CancellationToken cancellationToken = default)
         {
             var subjectFilter = new SubjectFilter()
@@ -45,21 +56,42 @@ namespace Schedule_App.API.Controllers
                 TeacherId = teacherId,
             };
 
-            var result = await _subjectService.GetSubjectsByFilter(subjectFilter, skip, take, cancellationToken);
+            IEnumerable<SubjectReadSummaryDTO> subjects;
 
-            return Ok(result);
+            if (withDetails)
+            {
+                subjects = await _subjectService.GetSubjectsDetailsByFilter(subjectFilter, skip, take, cancellationToken);
+            }
+            else
+            {
+                subjects = await _subjectService.GetSubjectsSummariesByFilter(subjectFilter, skip, take, cancellationToken);
+            }
+
+            return Ok(subjects);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<SubjectReadDTO>> GetSubjectById([FromRoute] int id, CancellationToken cancellationToken)
+        public async Task<ActionResult<SubjectReadSummaryDTO>> GetSubjectById(
+            [FromRoute] int id,
+            [FromQuery] bool withDetails = false, 
+            CancellationToken cancellationToken = default)
         {
-            var result = await _subjectService.GetSubjectById(id, cancellationToken);
+            SubjectReadSummaryDTO subject;
 
-            return Ok(result);
+            if (withDetails)
+            {
+                subject = await _subjectService.GetSubjectDetailsById(id, cancellationToken);
+            }
+            else
+            {
+                subject = await _subjectService.GetSubjectSummaryById(id, cancellationToken);
+            }
+
+            return Ok(subject);
         }
 
         [HttpPost]
-        public async Task<ActionResult<SubjectReadDTO>> AddSubject([FromBody] SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken)
+        public async Task<ActionResult<SubjectReadSummaryDTO>> AddSubject([FromBody] SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken)
         {
             var result = await _subjectService.AddSubject(subjectCreateDTO, cancellationToken);
 
@@ -67,7 +99,7 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<SubjectReadDTO>> UpdateSubjectTitle(
+        public async Task<ActionResult<SubjectReadSummaryDTO>> UpdateSubjectTitle(
             [FromRoute] int id,
             [FromBody] SubjectUpdateDTO subjectUpdateDTO,
             CancellationToken cancellationToken)

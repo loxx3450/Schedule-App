@@ -19,18 +19,44 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<SubjectReadDTO>> GetSubjects(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummaries(int skip, int take, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllNotDeleted<Subject>()
+            var subjects = await GetSubjects(skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<SubjectReadSummaryDTO>>(subjects);
+        }
+
+        public async Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetails(int skip, int take, CancellationToken cancellationToken)
+        {
+            var subjects = await GetSubjects(skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<SubjectReadFullDTO>>(subjects);
+        }
+
+        private Task<Subject[]> GetSubjects(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        {
+            return _repository.GetAllNotDeleted<Subject>()
                 .AsNoTracking()
                 .Skip(skip)
                 .Take(take)
                 .ToArrayAsync();
-
-            return _mapper.Map<IEnumerable<SubjectReadDTO>>(result);
         }
 
-        public async Task<IEnumerable<SubjectReadDTO>> GetSubjectsByFilter(SubjectFilter filter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummariesByFilter(SubjectFilter filter, int skip, int take, CancellationToken cancellationToken)
+        {
+            var subjects = await GetSubjectsByFilter(filter, skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<SubjectReadSummaryDTO>>(subjects);
+        }
+
+        public async Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailsByFilter(SubjectFilter filter, int skip, int take, CancellationToken cancellationToken)
+        {
+            var subjects = await GetSubjectsByFilter(filter, skip, take, cancellationToken);
+
+            return _mapper.Map<IEnumerable<SubjectReadFullDTO>>(subjects);
+        }
+
+        private async Task<Subject[]> GetSubjectsByFilter(SubjectFilter filter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
         {
             if (filter.Title is not null)
             {
@@ -49,19 +75,31 @@ namespace Schedule_App.API.Services
                     throw new KeyNotFoundException($"Teacher with ID '{filter.TeacherId}' is not found");
                 }
 
-                var subjects = teacher.Subjects
+                return teacher.Subjects
                     .Where(s => s.DeletedAt == null)
                     .Skip(skip)
                     .Take(take)
                     .ToArray();
-
-                return _mapper.Map<IEnumerable<SubjectReadDTO>>(subjects);
             }
 
             return [];
         }
 
-        public async Task<SubjectReadDTO> GetSubjectById(int id, CancellationToken cancellationToken = default)
+        public async Task<SubjectReadSummaryDTO> GetSubjectSummaryById(int id, CancellationToken cancellationToken)
+        {
+            var subject = await GetSubjectById(id, cancellationToken);
+
+            return _mapper.Map<SubjectReadSummaryDTO>(subject);
+        }
+
+        public async Task<SubjectReadFullDTO> GetSubjectDetailsById(int id, CancellationToken cancellationToken)
+        {
+            var subject = await GetSubjectById(id, cancellationToken);
+
+            return _mapper.Map<SubjectReadFullDTO>(subject);
+        }
+
+        private async Task<Subject> GetSubjectById(int id, CancellationToken cancellationToken = default)
         {
             var subject = await _repository.GetAllNotDeleted<Subject>()
                 .AsNoTracking()
@@ -72,10 +110,10 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Subject with ID '{id}' is not found");
             }
 
-            return _mapper.Map<SubjectReadDTO>(subject);
+            return subject;
         }
 
-        private async Task<SubjectReadDTO> GetSubjectByTitle(string title, CancellationToken cancellationToken = default)
+        private async Task<Subject> GetSubjectByTitle(string title, CancellationToken cancellationToken = default)
         {
             var subject = await _repository.GetAllNotDeleted<Subject>()
                 .AsNoTracking()
@@ -86,10 +124,10 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Subject with Title '{title}' is not found");
             }
 
-            return _mapper.Map<SubjectReadDTO>(subject);
+            return subject;
         }
 
-        public async Task<SubjectReadDTO> AddSubject(SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken = default)
+        public async Task<SubjectReadSummaryDTO> AddSubject(SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken = default)
         {
             // if title is already taken
             if (await IsTitleTaken(subjectCreateDTO.Title, cancellationToken))
@@ -103,10 +141,10 @@ namespace Schedule_App.API.Services
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<SubjectReadDTO>(subject);
+            return _mapper.Map<SubjectReadSummaryDTO>(subject);
         }
 
-        public async Task<SubjectReadDTO> UpdateSubjectTitle(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken = default)
+        public async Task<SubjectReadSummaryDTO> UpdateSubjectTitle(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken = default)
         {
             var subject = await _repository.GetAllNotDeleted<Subject>()
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
@@ -128,7 +166,7 @@ namespace Schedule_App.API.Services
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<SubjectReadDTO>(subject);
+            return _mapper.Map<SubjectReadSummaryDTO>(subject);
         }
 
         public async Task DeleteSubject(int id, CancellationToken cancellationToken = default)

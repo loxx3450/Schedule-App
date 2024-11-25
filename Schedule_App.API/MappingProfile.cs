@@ -15,19 +15,23 @@ namespace Schedule_App.API
         {
             CreateMap<LessonStatus, LessonStatusReadDTO>().ReverseMap();
 
-            CreateMap<Group, GroupReadDTO>().ReverseMap();
+            CreateMap<Group, GroupReadSummaryDTO>().ReverseMap();
+            CreateMap<Group, GroupReadFullDTO>().ReverseMap();
             CreateMap<Group, GroupCreateDTO>().ReverseMap();
 
-            CreateMap<Teacher, TeacherReadDTO>().ReverseMap();
+            CreateMap<Teacher, TeacherReadSummaryDTO>().ReverseMap();
+            CreateMap<Teacher, TeacherReadFullDTO>().ReverseMap();
             CreateMap<Teacher, TeacherCreateDTO>().ReverseMap();
             CreateMap<Teacher, TeacherUpdateDTO>().ReverseMap();
 
             CreateMap<GroupTeacher, GroupTeacherReadDTO>().ReverseMap();
 
-            CreateMap<Subject, SubjectReadDTO>().ReverseMap();
+            CreateMap<Subject, SubjectReadSummaryDTO>().ReverseMap();
+            CreateMap<Subject, SubjectReadFullDTO>().ReverseMap();
             CreateMap<Subject, SubjectCreateDTO>().ReverseMap();
 
-            CreateMap<Classroom, ClassroomReadDTO>().ReverseMap();
+            CreateMap<Classroom, ClassroomReadSummaryDTO>().ReverseMap();
+            CreateMap<Classroom, ClassroomReadFullDTO>().ReverseMap();
             CreateMap<Classroom, ClassroomCreateDTO>().ReverseMap();
         }
     }

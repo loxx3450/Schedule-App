@@ -46,7 +46,7 @@ namespace Schedule_App.API.Services
                 .Where(gt => gt.TeacherId == teacherId)
                 .Select(gt => new GroupTeacherReadDTO()
                 {
-                    Group = _mapper.Map<GroupReadDTO>(gt.Group),
+                    Group = _mapper.Map<GroupReadSummaryDTO>(gt.Group),
                     CreatedAt = gt.CreatedAt,
                     UpdatedAt = gt.UpdatedAt,
                 })
@@ -64,7 +64,7 @@ namespace Schedule_App.API.Services
                 .Where(gt => gt.GroupId == groupId)
                 .Select(gt => new GroupTeacherReadDTO()
                 {
-                    Teacher = _mapper.Map<TeacherReadDTO>(gt.Teacher),
+                    Teacher = _mapper.Map<TeacherReadSummaryDTO>(gt.Teacher),
                     CreatedAt = gt.CreatedAt,
                     UpdatedAt = gt.UpdatedAt,
                 })

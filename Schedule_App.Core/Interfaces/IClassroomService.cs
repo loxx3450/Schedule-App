@@ -10,13 +10,16 @@ namespace Schedule_App.Core.Interfaces
 {
     public interface IClassroomService
     {
-        Task<IEnumerable<ClassroomReadDTO>> GetClassrooms(int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummaries(int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetails(int skip, int take, CancellationToken cancellationToken);
 
-        Task<IEnumerable<ClassroomReadDTO>> GetClassroomsByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummariesByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailsByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken);
 
-        Task<ClassroomReadDTO> GetClassroomById(int id, CancellationToken cancellationToken);
+        Task<ClassroomReadSummaryDTO> GetClassroomSummaryById(int id, CancellationToken cancellationToken);
+        Task<ClassroomReadFullDTO> GetClassroomDetailsById(int id, CancellationToken cancellationToken);
 
-        Task<ClassroomReadDTO> AddClassroom(ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken);
+        Task<ClassroomReadSummaryDTO> AddClassroom(ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken);
 
         Task DeleteClassroom(int id, CancellationToken cancellationToken);
     }
