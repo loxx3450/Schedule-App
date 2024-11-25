@@ -37,6 +37,7 @@ namespace Schedule_App.API
 
             CreateMap<Lesson, LessonReadSummaryDTO>().ReverseMap();
             CreateMap<Lesson, LessonReadFullDTO>().ReverseMap();
+            CreateMap<Lesson, LessonCreateDTO>().ReverseMap();
         }
     }
 }

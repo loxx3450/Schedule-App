@@ -18,6 +18,9 @@ namespace Schedule_App.Core.DTOs.ValidationAttributes
 
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
+            if (value is null)
+                return null;
+
             var actualValue = (DateTime)value!;
 
             var property = validationContext.ObjectType.GetProperty(_comparisonProperty);

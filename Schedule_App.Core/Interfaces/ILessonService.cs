@@ -18,5 +18,11 @@ namespace Schedule_App.Core.Interfaces
 
         Task<LessonReadSummaryDTO> GetLessonSummaryById(int id, CancellationToken cancellationToken);
         Task<LessonReadFullDTO> GetLessonDetailsById(int id, CancellationToken cancellationToken);
+
+        Task<LessonReadSummaryDTO> AddLesson(LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken);
+
+        Task<LessonReadSummaryDTO> UpdateLesson(int id, LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken);
+
+        Task DeleteLesson(int id, CancellationToken cancellationToken);
     }
 }

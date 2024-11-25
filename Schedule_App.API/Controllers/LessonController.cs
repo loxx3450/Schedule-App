@@ -97,5 +97,29 @@ namespace Schedule_App.API.Controllers
 
             return Ok(lesson);
         }
+
+        [HttpPost]
+        public async Task<ActionResult<LessonReadSummaryDTO>> AddLesson([FromBody] LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken)
+        {
+            var lesson = await _lessonService.AddLesson(lessonCreateDTO, cancellationToken);
+
+            return Created($"{BASE_ENDPOINT}/{lesson.Id}", lesson);
+        }
+
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult<LessonReadSummaryDTO>> UpdateLesson([FromRoute] int id, [FromBody] LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken)
+        {
+            var lesson = await _lessonService.UpdateLesson(id, lessonUpdateDTO, cancellationToken);
+
+            return Ok(lesson);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> DeleteLesson(int id, CancellationToken cancellationToken)
+        {
+            await _lessonService.DeleteLesson(id, cancellationToken);
+
+            return NoContent();
+        }
     }
 }

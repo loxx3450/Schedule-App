@@ -12,6 +12,9 @@ namespace Schedule_App.Core.DTOs.ValidationAttributes
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
+            if (value is null)
+                return null;
+
             var currentValue = (DateOnly)value!;
 
             // Solves the problem of client having other time zone
