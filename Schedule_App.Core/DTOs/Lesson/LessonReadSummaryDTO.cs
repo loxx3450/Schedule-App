@@ -27,8 +27,6 @@ namespace Schedule_App.Core.DTOs.Lesson
 
         public string? AdditionalInfo { get; set; }
 
-        public DateOnly Date { get; set; }
-
         public DateTime StartsAt { get; set; }
 
         public DateTime EndsAt { get; set; }

@@ -31,10 +31,7 @@ namespace Schedule_App.Core.DTOs.Lesson
         public string? AdditionalInfo { get; set; } = null;
 
         [DefaultValue(null)]
-        [FutureDate(ErrorMessage = "The date must be in the future.")]
-        public DateOnly? Date { get; set; } = null;
-
-        [DefaultValue(null)]
+        [FutureDate(ErrorMessage = "The Lesson's start time should be from the future")]
         public DateTime? StartsAt { get; set; } = null;
 
         [DefaultValue(null)]

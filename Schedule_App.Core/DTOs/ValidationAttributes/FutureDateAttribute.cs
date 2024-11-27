@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Schedule_App.Core.DTOs.ValidationAttributes
 {
@@ -15,13 +14,10 @@ namespace Schedule_App.Core.DTOs.ValidationAttributes
             if (value is null)
                 return null;
 
-            var currentValue = (DateOnly)value!;
+            var actualTime = (DateTime)value!;
 
-            // Solves the problem of client having other time zone
-            // TODO: solve
-            var yesterday = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-
-            if (currentValue < yesterday)
+            // If it is the date from the past
+            if (actualTime < DateTime.UtcNow)
             {
                 return new ValidationResult(ErrorMessage);
             }

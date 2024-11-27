@@ -62,7 +62,7 @@ namespace Schedule_App.API.Services
                 .AsNoTracking();
 
             lessons = lessons.Where(l => 
-                (filter.Date == null || l.Date == filter.Date) &&
+                (filter.Date == null || DateOnly.FromDateTime(l.StartsAt) == filter.Date) &&
                 (filter.ClassroomId == null || l.ClassroomId == filter.ClassroomId) &&
                 (filter.SubjectId == null || l.SubjectId == filter.SubjectId) &&
                 (filter.GroupId == null || l.GroupId == filter.GroupId) &&
@@ -176,7 +176,6 @@ namespace Schedule_App.API.Services
             lesson.GroupId = lessonUpdateDTO.GroupId ?? lesson.GroupId;
             lesson.TeacherId = lessonUpdateDTO.TeacherId ?? lesson.TeacherId;
             lesson.AdditionalInfo = lessonUpdateDTO.AdditionalInfo ?? lesson.AdditionalInfo;
-            lesson.Date = lessonUpdateDTO.Date ?? lesson.Date;
             lesson.StartsAt = lessonUpdateDTO.StartsAt ?? lesson.StartsAt;
             lesson.EndsAt = lessonUpdateDTO.EndsAt ?? lesson.EndsAt;
             lesson.StatusId = lessonUpdateDTO.StatusId ?? lesson.StatusId;

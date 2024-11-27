@@ -34,9 +34,7 @@ namespace Schedule_App.Core.Models
         public string? AdditionalInfo { get; set; }
 
         [Required]
-        public DateOnly Date { get; set; }
-
-        [Required]
+        [FutureDate]
         public DateTime StartsAt { get; set; }
 
         [Required]
