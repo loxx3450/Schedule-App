@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Schedule_App.API.Helpers;
 using Schedule_App.Core.DTOs.Group;
 using Schedule_App.Core.DTOs.Teacher;
 using Schedule_App.Core.Filters;
@@ -167,7 +168,6 @@ namespace Schedule_App.API.Services
             return teacher;
         }
 
-        // TODO: add hashing
         public async Task<TeacherReadSummaryDTO> AddTeacher(TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken = default)
         {
             // if username is already taken
@@ -177,6 +177,9 @@ namespace Schedule_App.API.Services
             }
 
             var teacher = _mapper.Map<Teacher>(teacherCreateDTO);
+
+            // Hashing password
+            teacher.Password = PasswordHasher.Hash(teacherCreateDTO.Password);
 
             await _repository.AddAuditableEntity<Teacher>(teacher, cancellationToken);
 
@@ -195,7 +198,7 @@ namespace Schedule_App.API.Services
             }
 
             // if new username is not null and not already taken
-            if (! string.IsNullOrEmpty(teacherUpdateDTO.Username))
+            if (teacherUpdateDTO.Username is not null)
             {
                 if (await IsUsernameTaken(teacherUpdateDTO.Username, cancellationToken))
                 {
@@ -204,8 +207,13 @@ namespace Schedule_App.API.Services
 
                 teacher.Username = teacherUpdateDTO.Username;
             }
-            // TODO: add hashing
-            teacher.Password = teacherUpdateDTO.Password ?? teacher.Password;
+
+            // Hashing password
+            if (teacherUpdateDTO.Password is not null)
+            {
+                teacher.Password = PasswordHasher.Hash(teacherUpdateDTO.Password);
+            }
+
             teacher.FirstName = teacherUpdateDTO.FirstName ?? teacher.FirstName;
             teacher.LastName = teacherUpdateDTO.LastName ?? teacher.LastName;
             teacher.Age = teacherUpdateDTO.Age ?? teacher.Age;
