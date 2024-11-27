@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Schedule_App.API;
 using Schedule_App.API.Filters;
 using Schedule_App.API.Services;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Storage;
-using Microsoft.OpenApi.Models;
+using Schedule_App.API.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Schedule_App.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +30,10 @@ builder.Services.AddScoped<IGroupTeacherService, GroupTeacherService>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 builder.Services.AddScoped<ILessonService, LessonService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Helpers
+builder.Services.AddSingleton<TokenProvider>();
 
 builder.Services.AddControllers(opt =>
 {
@@ -45,18 +52,22 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =>
+    {
+        opt.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"]!)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-// Swagger: DateOnly properties should be provided as strings
-builder.Services.AddSwaggerGen(opt =>
-{
-    opt.MapType<DateOnly>(() => new OpenApiSchema()
-    {
-        Type = "string",
-        Format = "date"
-    });
-});
+builder.Services.AddSwaggerGenWithAuth();
 
 var app = builder.Build();
 
@@ -68,6 +79,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

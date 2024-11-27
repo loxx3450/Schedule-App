@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Schedule_App.Core.DTOs.GroupTeacher;
 using Schedule_App.Core.Interfaces;
 
@@ -6,6 +7,7 @@ namespace Schedule_App.API.Controllers
 {
     [ApiController]
     [Route(BASE_ENDPOINT)]
+    [Authorize]
     public class GroupTeacherController : ControllerBase
     {
         private const string BASE_ENDPOINT = "api/groups_teachers";
