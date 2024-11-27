@@ -23,13 +23,10 @@ namespace Schedule_App.Core.DTOs.ValidationAttributes
 
             var actualValue = (DateTime)value!;
 
-            var property = validationContext.ObjectType.GetProperty(_comparisonProperty);
+            var property = validationContext.ObjectType.GetProperty(_comparisonProperty) 
+                ?? throw new ArgumentException($"Property with name {_comparisonProperty} is not found");
 
-            if (property is null)
-            {
-                throw new ArgumentException($"Property with name {_comparisonProperty} is not found");
-            }
-
+            // Value that is saved in the 'property'
             var comparisonValue = (DateTime)property.GetValue(validationContext.ObjectInstance)!;
 
             if (actualValue > comparisonValue)

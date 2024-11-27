@@ -19,44 +19,44 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummaries(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummaries(int offset, int limit, CancellationToken cancellationToken)
         {
-            var subjects = await GetSubjects(skip, take, cancellationToken);
+            var subjects = await GetSubjects(offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<SubjectReadSummaryDTO>>(subjects);
         }
 
-        public async Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetails(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailed(int offset, int limit, CancellationToken cancellationToken)
         {
-            var subjects = await GetSubjects(skip, take, cancellationToken);
+            var subjects = await GetSubjects(offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<SubjectReadFullDTO>>(subjects);
         }
 
-        private Task<Subject[]> GetSubjects(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        private Task<Subject[]> GetSubjects(int offset = 0, int limit = 20, CancellationToken cancellationToken = default)
         {
             return _repository.GetAllNotDeleted<Subject>()
                 .AsNoTracking()
-                .Skip(skip)
-                .Take(take)
+                .Skip(offset)
+                .Take(limit)
                 .ToArrayAsync();
         }
 
-        public async Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummariesByFilter(SubjectFilter filter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummariesByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
-            var subjects = await GetSubjectsByFilter(filter, skip, take, cancellationToken);
+            var subjects = await GetSubjectsByFilter(filter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<SubjectReadSummaryDTO>>(subjects);
         }
 
-        public async Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailsByFilter(SubjectFilter filter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailedByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
-            var subjects = await GetSubjectsByFilter(filter, skip, take, cancellationToken);
+            var subjects = await GetSubjectsByFilter(filter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<SubjectReadFullDTO>>(subjects);
         }
 
-        private async Task<Subject[]> GetSubjectsByFilter(SubjectFilter filter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        private async Task<Subject[]> GetSubjectsByFilter(SubjectFilter filter, int offset = 0, int limit = 20, CancellationToken cancellationToken = default)
         {
             if (filter.Title is not null)
             {
@@ -77,8 +77,8 @@ namespace Schedule_App.API.Services
 
                 return teacher.Subjects
                     .Where(s => s.DeletedAt == null)
-                    .Skip(skip)
-                    .Take(take)
+                    .Skip(offset)
+                    .Take(limit)
                     .ToArray();
             }
 
@@ -92,7 +92,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<SubjectReadSummaryDTO>(subject);
         }
 
-        public async Task<SubjectReadFullDTO> GetSubjectDetailsById(int id, CancellationToken cancellationToken)
+        public async Task<SubjectReadFullDTO> GetSubjectDetailedById(int id, CancellationToken cancellationToken)
         {
             var subject = await GetSubjectById(id, cancellationToken);
 
@@ -129,8 +129,8 @@ namespace Schedule_App.API.Services
 
         public async Task<SubjectReadSummaryDTO> AddSubject(SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken = default)
         {
-            // if title is already taken
-            if (await IsTitleTaken(subjectCreateDTO.Title, cancellationToken))
+            // if title is already limitn
+            if (await IsTitlelimitn(subjectCreateDTO.Title, cancellationToken))
             {
                 throw new ArgumentException($"Subject with Title '{subjectCreateDTO.Title}' already exists");
             }
@@ -144,7 +144,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<SubjectReadSummaryDTO>(subject);
         }
 
-        public async Task<SubjectReadSummaryDTO> UpdateSubjectTitle(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken = default)
+        public async Task<SubjectReadSummaryDTO> UpdateSubject(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken = default)
         {
             var subject = await _repository.GetAllNotDeleted<Subject>()
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
@@ -154,8 +154,8 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Subject with ID '{id}' is not found");
             }
 
-            // if title is already taken
-            if (await IsTitleTaken(subjectUpdateDTO.Title, cancellationToken))
+            // if title is already limitn
+            if (await IsTitlelimitn(subjectUpdateDTO.Title, cancellationToken))
             {
                 throw new ArgumentException($"Subject with Title '{subjectUpdateDTO.Title}' already exists");
             }
@@ -181,7 +181,7 @@ namespace Schedule_App.API.Services
             }
 
             // Changing state of timestamp's
-            await _repository.DeleteSoft<Subject>(subject);
+            await _repository.DeleteSoft<Subject>(subject, cancellationToken);
 
             // Updating value for Unique Field
             subject.Title = $"{subject.Title}_deleted_{subject.DeletedAt}";
@@ -202,7 +202,7 @@ namespace Schedule_App.API.Services
             }
         }
 
-        private Task<bool> IsTitleTaken(string title, CancellationToken cancellationToken)
+        private Task<bool> IsTitlelimitn(string title, CancellationToken cancellationToken)
         {
             return _repository.GetAll<Subject>()
                 .AnyAsync(s => s.Title == title);

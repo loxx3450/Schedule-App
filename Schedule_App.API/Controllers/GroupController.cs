@@ -24,20 +24,20 @@ namespace Schedule_App.API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GroupReadSummaryDTO>>> GetGroups(
-            [FromQuery] int skip = 0, 
-            [FromQuery] int take = 20,
-            [FromQuery] bool withDetails = false,
+            [FromQuery] int offset = 0, 
+            [FromQuery] int limit = 20,
+            [FromQuery] bool withDetailed = false,
             CancellationToken cancellationToken = default)
         {
             IEnumerable<GroupReadSummaryDTO> groups;
 
-            if (withDetails)
+            if (withDetailed)
             {
-                groups = await _groupService.GetGroupsDetails(skip, take, cancellationToken);
+                groups = await _groupService.GetGroupsDetailed(offset, limit, cancellationToken);
             }
             else
             {
-                groups = await _groupService.GetGroupsSummaries(skip, take, cancellationToken);
+                groups = await _groupService.GetGroupsSummaries(offset, limit, cancellationToken);
             }
 
             return Ok(groups);
@@ -49,9 +49,9 @@ namespace Schedule_App.API.Controllers
             [FromQuery] string? title = null,
             [FromQuery] string? titlePattern = null,
             [FromQuery] int? teacherId = null,
-            [FromQuery] int skip = 0,
-            [FromQuery] int take = 20,
-            [FromQuery] bool withDetails = false,
+            [FromQuery] int offset = 0,
+            [FromQuery] int limit = 20,
+            [FromQuery] bool withDetailed = false,
             CancellationToken cancellationToken = default)
         {
             var groupFilter = new GroupFilter()
@@ -63,13 +63,13 @@ namespace Schedule_App.API.Controllers
 
             IEnumerable<GroupReadSummaryDTO> groups;
 
-            if (withDetails)
+            if (withDetailed)
             {
-                groups = await _groupService.GetGroupsDetailsByFilter(groupFilter, skip, take, cancellationToken);
+                groups = await _groupService.GetGroupsDetailedByFilter(groupFilter, offset, limit, cancellationToken);
             }
             else
             {
-                groups = await _groupService.GetGroupsSummariesByFilter(groupFilter, skip, take, cancellationToken);
+                groups = await _groupService.GetGroupsSummariesByFilter(groupFilter, offset, limit, cancellationToken);
             }
 
             return Ok(groups);
@@ -79,14 +79,14 @@ namespace Schedule_App.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GroupReadSummaryDTO>> GetGroupById(
             [FromRoute] int id, 
-            [FromQuery] bool withDetails = false,
+            [FromQuery] bool withDetailed = false,
             CancellationToken cancellationToken = default)
         {
             GroupReadSummaryDTO group;
 
-            if (withDetails)
+            if (withDetailed)
             {
-                group = await _groupService.GetGroupDetailsById(id, cancellationToken);
+                group = await _groupService.GetGroupDetailedById(id, cancellationToken);
             }
             else
             {
@@ -112,7 +112,7 @@ namespace Schedule_App.API.Controllers
             [FromBody] GroupUpdateDTO groupUpdateDTO, 
             CancellationToken cancellationToken)
         {
-            var result = await _groupService.UpdateGroupTitle(id, groupUpdateDTO, cancellationToken);
+            var result = await _groupService.UpdateGroup(id, groupUpdateDTO, cancellationToken);
 
             return Ok(result);
         }

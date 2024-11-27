@@ -19,44 +19,44 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummaries(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummaries(int offset, int limit, CancellationToken cancellationToken)
         {
-            var classrooms = await GetClassrooms(skip, take, cancellationToken);
+            var classrooms = await GetClassrooms(offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<ClassroomReadSummaryDTO>>(classrooms);
         }
 
-        public async Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetails(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailed(int offset, int limit, CancellationToken cancellationToken)
         {
-            var classrooms = await GetClassrooms(skip, take, cancellationToken);
+            var classrooms = await GetClassrooms(offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<ClassroomReadFullDTO>>(classrooms);
         }
 
-        private Task<Classroom[]> GetClassrooms(int skip, int take, CancellationToken cancellationToken)
+        private Task<Classroom[]> GetClassrooms(int offset, int limit, CancellationToken cancellationToken)
         {
             return _repository.GetAllNotDeleted<Classroom>()
                 .AsNoTracking()
-                .Skip(skip)
-                .Take(take)
+                .Skip(offset)
+                .Take(limit)
                 .ToArrayAsync();
         }
 
-        public async Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummariesByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummariesByFilter(ClassroomFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
-            var classrooms = await GetClassroomsByFilter(filter, skip, take, cancellationToken);
+            var classrooms = await GetClassroomsByFilter(filter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<ClassroomReadSummaryDTO>>(classrooms);
         }
 
-        public async Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailsByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailedByFilter(ClassroomFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
-            var classrooms = await GetClassroomsByFilter(filter, skip, take, cancellationToken);
+            var classrooms = await GetClassroomsByFilter(filter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<ClassroomReadFullDTO>>(classrooms);
         }
 
-        private async Task<Classroom[]> GetClassroomsByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken)
+        private async Task<Classroom[]> GetClassroomsByFilter(ClassroomFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
             if (filter.Title is not null)
             {
@@ -73,7 +73,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<ClassroomReadSummaryDTO>(classroom);
         }
 
-        public async Task<ClassroomReadFullDTO> GetClassroomDetailsById(int id, CancellationToken cancellationToken)
+        public async Task<ClassroomReadFullDTO> GetClassroomDetailedById(int id, CancellationToken cancellationToken)
         {
             var classroom = await GetClassroomById(id, cancellationToken);
 
@@ -110,14 +110,14 @@ namespace Schedule_App.API.Services
 
         public async Task<ClassroomReadSummaryDTO> AddClassroom(ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken)
         {
-            if (await IsTitleTaken(classroomCreateDTO.Title, cancellationToken))
+            if (await IsTitlelimitn(classroomCreateDTO.Title, cancellationToken))
             {
                 throw new ArgumentException($"Classroom with Title '{classroomCreateDTO.Title}' already exists");
             }
 
             var classroom = _mapper.Map<Classroom>(classroomCreateDTO);
 
-            await _repository.AddAuditableEntity<Classroom>(classroom);
+            await _repository.AddAuditableEntity<Classroom>(classroom, cancellationToken);
             await _repository.SaveChanges(cancellationToken);
 
             return _mapper.Map<ClassroomReadSummaryDTO>(classroom);
@@ -135,7 +135,7 @@ namespace Schedule_App.API.Services
             }
 
             // Changing state of timestamp's
-            await _repository.DeleteSoft<Classroom>(classroom);
+            await _repository.DeleteSoft(classroom, cancellationToken);
 
             // Updating value for Unique Field
             classroom.Title = $"{classroom.Title}_deleted_{classroom.DeletedAt}";
@@ -156,7 +156,7 @@ namespace Schedule_App.API.Services
             }
         }
 
-        private Task<bool> IsTitleTaken(string title, CancellationToken cancellationToken)
+        private Task<bool> IsTitlelimitn(string title, CancellationToken cancellationToken)
         {
             return _repository.GetAll<Classroom>()
                 .AnyAsync(c => c.Title == title, cancellationToken);

@@ -10,14 +10,14 @@ namespace Schedule_App.Core.Interfaces
 {
     public interface ILessonService
     {
-        Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummaries(int skip, int take, CancellationToken cancellationToken);
-        Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetails(int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummaries(int offset, int limit, CancellationToken cancellationToken);
+        Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailed(int offset, int limit, CancellationToken cancellationToken);
 
-        Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummariesByFilter(LessonFilter filter, int skip, int take, CancellationToken cancellationToken);
-        Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailsByFilter(LessonFilter filter, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummariesByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken);
+        Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailedByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken);
 
         Task<LessonReadSummaryDTO> GetLessonSummaryById(int id, CancellationToken cancellationToken);
-        Task<LessonReadFullDTO> GetLessonDetailsById(int id, CancellationToken cancellationToken);
+        Task<LessonReadFullDTO> GetLessonDetailedById(int id, CancellationToken cancellationToken);
 
         Task<LessonReadSummaryDTO> AddLesson(LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken);
 

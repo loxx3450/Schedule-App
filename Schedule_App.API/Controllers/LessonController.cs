@@ -24,20 +24,20 @@ namespace Schedule_App.API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LessonReadSummaryDTO>>> GetTeachers(
-            [FromQuery] int skip = 0,
-            [FromQuery] int take = 20,
-            [FromQuery] bool withDetails = false,
+            [FromQuery] int offset = 0,
+            [FromQuery] int limit = 20,
+            [FromQuery] bool withDetailed = false,
             CancellationToken cancellationToken = default)
         {
             IEnumerable<LessonReadSummaryDTO> lessons;
 
-            if (withDetails)
+            if (withDetailed)
             {
-                lessons = await _lessonService.GetLessonsDetails(skip, take, cancellationToken);
+                lessons = await _lessonService.GetLessonsDetailed(offset, limit, cancellationToken);
             }
             else
             {
-                lessons = await _lessonService.GetLessonsSummaries(skip, take, cancellationToken);
+                lessons = await _lessonService.GetLessonsSummaries(offset, limit, cancellationToken);
             }
 
             return Ok(lessons);
@@ -51,9 +51,9 @@ namespace Schedule_App.API.Controllers
             [FromQuery] int? teacherId,
             [FromQuery] DateOnly? date,
             [FromQuery] int? statusId,
-            [FromQuery] int skip = 0,
-            [FromQuery] int take = 20,
-            [FromQuery] bool withDetails = false,
+            [FromQuery] int offset = 0,
+            [FromQuery] int limit = 20,
+            [FromQuery] bool withDetailed = false,
             CancellationToken cancellationToken = default)
         {
             var lessonFilter = new LessonFilter()
@@ -62,19 +62,19 @@ namespace Schedule_App.API.Controllers
                 SubjectId = subjectId,
                 GroupId = groupId,
                 TeacherId = teacherId,
-                Date = date,
+                StartDate = date,
                 StatusId = statusId,
             };
 
             IEnumerable<LessonReadSummaryDTO> lessons;
 
-            if (withDetails)
+            if (withDetailed)
             {
-                lessons = await _lessonService.GetLessonsDetailsByFilter(lessonFilter, skip, take, cancellationToken);
+                lessons = await _lessonService.GetLessonsDetailedByFilter(lessonFilter, offset, limit, cancellationToken);
             }
             else
             {
-                lessons = await _lessonService.GetLessonsSummariesByFilter(lessonFilter, skip, take, cancellationToken);
+                lessons = await _lessonService.GetLessonsSummariesByFilter(lessonFilter, offset, limit, cancellationToken);
             }
 
             return Ok(lessons);
@@ -83,14 +83,14 @@ namespace Schedule_App.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<LessonReadSummaryDTO>> GetLessonById(
             [FromRoute] int id,
-            [FromQuery] bool withDetails = false,
+            [FromQuery] bool withDetailed = false,
             CancellationToken cancellationToken = default)
         {
             LessonReadSummaryDTO lesson;
 
-            if (withDetails)
+            if (withDetailed)
             {
-                lesson = await _lessonService.GetLessonDetailsById(id, cancellationToken);
+                lesson = await _lessonService.GetLessonDetailedById(id, cancellationToken);
             }   
             else
             {

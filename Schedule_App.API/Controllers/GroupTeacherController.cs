@@ -22,8 +22,8 @@ namespace Schedule_App.API.Controllers
         public async Task<ActionResult<IEnumerable<GroupTeacherReadDTO>>> GetGroupTeacherInfos(
             [FromQuery] int? groupId = null,
             [FromQuery] int? teacherId = null,
-            [FromQuery] int skip = 0,
-            [FromQuery] int take = 20,
+            [FromQuery] int offset = 0,
+            [FromQuery] int limit = 20,
             CancellationToken cancellationToken = default)
         {
             IEnumerable<GroupTeacherReadDTO> result;
@@ -31,22 +31,22 @@ namespace Schedule_App.API.Controllers
             if (groupId.HasValue && teacherId.HasValue)
             {
                 // Get the exact one match
-                result = [ await _groupTeacherService.GetGroupTeacherInfo(groupId.Value!, teacherId.Value!, cancellationToken) ];
+                result = [ await _groupTeacherService.GetGroupTeacherAssociation(groupId.Value!, teacherId.Value!, cancellationToken) ];
             }
             else if (teacherId.HasValue)
             {
                 // Get all Groups that have association with Teacher + extra info about their relationship
-                result = await _groupTeacherService.GetGroupsByTeacherId(teacherId.Value!, skip, take, cancellationToken);
+                result = await _groupTeacherService.GetGroupsByTeacherId(teacherId.Value!, offset, limit, cancellationToken);
             }
             else if (groupId.HasValue)
             {
                 // Get all Teachers that have association with Group + extra info about their relationship
-                result = await _groupTeacherService.GetTeachersByGroupId(groupId.Value!, skip, take, cancellationToken);
+                result = await _groupTeacherService.GetTeachersByGroupId(groupId.Value!, offset, limit, cancellationToken);
             }
             else
             {
                 // Get all GroupTeacher's
-                result = await _groupTeacherService.GetGroupTeacherInfos(skip, take, cancellationToken);
+                result = await _groupTeacherService.GetGroupTeacherAssociations(offset, limit, cancellationToken);
             }
 
             return Ok(result);

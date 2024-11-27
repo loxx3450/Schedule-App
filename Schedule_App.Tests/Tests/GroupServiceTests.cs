@@ -50,7 +50,7 @@ namespace Schedule_App.Tests.Tests
         [InlineData(0, 3, 3)]
         [InlineData(3, 5, 2)]
         [InlineData(6, 5, 0)]
-        public async Task GetGroups_CorrectSkipAndTake_ReturnsCorrectResult(int skip, int take, int expectedCount)
+        public async Task GetGroups_CorrectoffsetAndlimit_ReturnsCorrectResult(int offset, int limit, int expectedCount)
         {
             // Assign
             var groups = GetMockGroups();
@@ -62,7 +62,7 @@ namespace Schedule_App.Tests.Tests
             var service = new GroupService(new MockRepository(context.Object), _mapper);
 
             // Act
-            var result = await service.GetGroups(skip, take);
+            var result = await service.GetGroups(offset, limit);
 
             // Assert
             Assert.Equal(expectedCount, result.Count());
@@ -389,7 +389,7 @@ namespace Schedule_App.Tests.Tests
         }
 
         [Fact]
-        public async Task AddGroup_AlreadyTakenTitle_ThrowsArgumentException()
+        public async Task AddGroup_AlreadylimitnTitle_ThrowsArgumentException()
         {
             // Assign
             var groups = GetMockGroups();
@@ -428,7 +428,7 @@ namespace Schedule_App.Tests.Tests
         }
 
         [Fact]
-        public async Task UpdateGroupTitle_AlreadyTakenTitle_ThrowsArgumentException()
+        public async Task UpdateGroupTitle_AlreadylimitnTitle_ThrowsArgumentException()
         {
             // Assign
             var groups = GetMockGroups();

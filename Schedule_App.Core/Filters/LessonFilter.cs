@@ -12,7 +12,7 @@ namespace Schedule_App.Core.Filters
         public int? SubjectId { get; set; } = null;
         public int? GroupId { get; set; } = null;
         public int? TeacherId { get; set; } = null;
-        public DateOnly? Date { get; set; } = null;
+        public DateOnly? StartDate { get; set; } = null;
         public int? StatusId { get; set; } = null;
     }
 }

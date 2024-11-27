@@ -20,44 +20,44 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummaries(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummaries(int offset = 0, int limit = 20, CancellationToken cancellationToken = default)
         {
-            var groups = await GetGroups(skip, take, cancellationToken);
+            var groups = await GetGroups(offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<GroupReadSummaryDTO>>(groups);
         }
 
-        public async Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetails(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetailed(int offset, int limit, CancellationToken cancellationToken)
         {
-            var groups = await GetGroups(skip, take, cancellationToken);
+            var groups = await GetGroups(offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<GroupReadFullDTO>>(groups);
         }
 
-        private async Task<IEnumerable<Group>> GetGroups(int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        private async Task<IEnumerable<Group>> GetGroups(int offset = 0, int limit = 20, CancellationToken cancellationToken = default)
         {
             return await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
-                .Skip(skip)
-                .Take(take)
+                .Skip(offset)
+                .Take(limit)
                 .ToArrayAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummariesByFilter(GroupFilter groupFilter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummariesByFilter(GroupFilter groupFilter, int offset = 0, int limit = 20, CancellationToken cancellationToken = default)
         {
-            var groups = await GetGroupsByFilter(groupFilter, skip, take, cancellationToken);
+            var groups = await GetGroupsByFilter(groupFilter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<GroupReadSummaryDTO>>(groups);
         }
 
-        public async Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetailsByFilter(GroupFilter groupFilter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetailedByFilter(GroupFilter groupFilter, int offset, int limit, CancellationToken cancellationToken)
         {
-            var groups = await GetGroupsByFilter(groupFilter, skip, take, cancellationToken);
+            var groups = await GetGroupsByFilter(groupFilter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<GroupReadFullDTO>>(groups);
         }
 
-        private async Task<IEnumerable<Group>> GetGroupsByFilter(GroupFilter groupFilter, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        private async Task<IEnumerable<Group>> GetGroupsByFilter(GroupFilter groupFilter, int offset = 0, int limit = 20, CancellationToken cancellationToken = default)
         {
             if (groupFilter.Title is not null)
             {
@@ -84,14 +84,14 @@ namespace Schedule_App.API.Services
                 }
 
                 return await groups
-                    .Skip(skip)
-                    .Take(take)
+                    .Skip(offset)
+                    .Take(limit)
                     .ToArrayAsync(cancellationToken);
             }
 
             if (groupFilter.TitlePattern is not null)
             {
-                return await GetGroupsByTitlePattern(groupFilter.TitlePattern, skip, take, cancellationToken);
+                return await GetGroupsByTitlePattern(groupFilter.TitlePattern, offset, limit, cancellationToken);
             }
 
             return [];
@@ -104,7 +104,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<GroupReadSummaryDTO>(group);
         }
 
-        public async Task<GroupReadFullDTO> GetGroupDetailsById(int id, CancellationToken cancellationToken = default)
+        public async Task<GroupReadFullDTO> GetGroupDetailedById(int id, CancellationToken cancellationToken = default)
         {
             var group = await GetGroupById(id, cancellationToken);
 
@@ -139,13 +139,13 @@ namespace Schedule_App.API.Services
             return group;
         }
 
-        private async Task<IEnumerable<Group>> GetGroupsByTitlePattern(string title, int skip, int take, CancellationToken cancellationToken)
+        private async Task<IEnumerable<Group>> GetGroupsByTitlePattern(string title, int offset, int limit, CancellationToken cancellationToken)
         {
             return await _repository.GetAllNotDeleted<Group>()
                 .AsNoTracking()
                 .Where(g => g.Title.Contains(title))
-                .Skip(skip)
-                .Take(take)
+                .Skip(offset)
+                .Take(limit)
                 .ToArrayAsync(cancellationToken);
         }
 
@@ -153,7 +153,7 @@ namespace Schedule_App.API.Services
         {
             var group = _mapper.Map<Group>(groupCreateDTO);
 
-            if (await IsTitleTaken(groupCreateDTO.Title, cancellationToken))
+            if (await IsTitlelimitn(groupCreateDTO.Title, cancellationToken))
             {
                 throw new ArgumentException($"Group with Title '{groupCreateDTO.Title}' already exists");
             }
@@ -165,7 +165,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<GroupReadSummaryDTO>(group);
         }
 
-        public async Task<GroupReadSummaryDTO> UpdateGroupTitle(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken)
+        public async Task<GroupReadSummaryDTO> UpdateGroup(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken)
         {
             var group = await _repository.GetAll<Group>()
                 .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
@@ -175,7 +175,7 @@ namespace Schedule_App.API.Services
                 throw new KeyNotFoundException($"Group with ID '{id}' is not found");
             }
 
-            if (await IsTitleTaken(groupUpdateDTO.Title, cancellationToken))
+            if (await IsTitlelimitn(groupUpdateDTO.Title, cancellationToken))
             {
                 throw new ArgumentException($"Group with Title '{groupUpdateDTO.Title}' already exists");
             }
@@ -200,13 +200,13 @@ namespace Schedule_App.API.Services
             }
 
             // Changing state of timestamp's
-            await _repository.DeleteSoft<Group>(group);
+            await _repository.DeleteSoft<Group>(group, cancellationToken);
 
             // Updating value for Unique Field
             group.Title = $"{group.Title}_deleted_{group.DeletedAt}";
 
             // Soft Delete all records, that are associated with this Group
-            await DeleteAssociationsWithTeachers(id);
+            await DeleteAssociationsWithTeachers(id, cancellationToken);
 
             await DeleteAssociatedLessons(group.Lessons, cancellationToken);
 
@@ -224,7 +224,7 @@ namespace Schedule_App.API.Services
             }
         }
 
-        private async Task DeleteAssociationsWithTeachers(int groupId)
+        private async Task DeleteAssociationsWithTeachers(int groupId, CancellationToken cancellationToken)
         {
             var groupTeacherInfos = await _repository.GetAllNotDeleted<GroupTeacher>()
                 .Where(gt => gt.GroupId == groupId)
@@ -232,11 +232,11 @@ namespace Schedule_App.API.Services
 
             foreach (var info in groupTeacherInfos)
             {
-                await _repository.DeleteSoft<GroupTeacher>(info);
+                await _repository.DeleteSoft<GroupTeacher>(info, cancellationToken);
             }
         }
 
-        private Task<bool> IsTitleTaken(string title, CancellationToken cancellationToken)
+        private Task<bool> IsTitlelimitn(string title, CancellationToken cancellationToken)
         {
             return _repository.GetAll<Group>()
                 .AnyAsync(g => g.Title == title, cancellationToken);

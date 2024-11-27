@@ -19,58 +19,58 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummaries(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummaries(int offset, int limit, CancellationToken cancellationToken)
         {
-            var lessons = await GetLessons(skip, take, cancellationToken);
+            var lessons = await GetLessons(offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<LessonReadSummaryDTO>>(lessons);
         }
 
-        public async Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetails(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailed(int offset, int limit, CancellationToken cancellationToken)
         {
-            var lessons = await GetLessons(skip, take, cancellationToken);
+            var lessons = await GetLessons(offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<LessonReadFullDTO>>(lessons);
         }
 
-        private Task<Lesson[]> GetLessons(int skip, int take, CancellationToken cancellationToken)
+        private Task<Lesson[]> GetLessons(int offset, int limit, CancellationToken cancellationToken)
         {
             return _repository.GetAllNotDeleted<Lesson>()
                 .AsNoTracking()
-                .Skip(skip)
-                .Take(take)
+                .Skip(offset)
+                .Take(limit)
                 .ToArrayAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummariesByFilter(LessonFilter filter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummariesByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
-             var lessons = await GetLessonsByFilter(filter, skip, take, cancellationToken);
+             var lessons = await GetLessonsByFilter(filter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<LessonReadSummaryDTO>>(lessons);
         }
 
-        public async Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailsByFilter(LessonFilter filter, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailedByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
-            var lessons = await GetLessonsByFilter(filter, skip, take, cancellationToken);
+            var lessons = await GetLessonsByFilter(filter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<LessonReadFullDTO>>(lessons);
         }
 
-        private Task<Lesson[]> GetLessonsByFilter(LessonFilter filter, int skip, int take, CancellationToken cancellationToken)
+        private Task<Lesson[]> GetLessonsByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
             var lessons = _repository.GetAllNotDeleted<Lesson>()
                 .AsNoTracking();
 
             lessons = lessons.Where(l => 
-                (filter.Date == null || DateOnly.FromDateTime(l.StartsAt) == filter.Date) &&
+                (filter.StartDate == null || DateOnly.FromDateTime(l.StartsAt) == filter.StartDate) &&
                 (filter.ClassroomId == null || l.ClassroomId == filter.ClassroomId) &&
                 (filter.SubjectId == null || l.SubjectId == filter.SubjectId) &&
                 (filter.GroupId == null || l.GroupId == filter.GroupId) &&
                 (filter.TeacherId == null || l.TeacherId == filter.TeacherId) &&
                 (filter.StatusId == null || l.StatusId == filter.StatusId));
 
-            return lessons.Skip(skip)
-                .Take(take)
+            return lessons.Skip(offset)
+                .Take(limit)
                 .ToArrayAsync(cancellationToken);
         }
 
@@ -80,7 +80,7 @@ namespace Schedule_App.API.Services
 
             return _mapper.Map<LessonReadSummaryDTO>(lesson);
         }
-        public async Task<LessonReadFullDTO> GetLessonDetailsById(int id, CancellationToken cancellationToken)
+        public async Task<LessonReadFullDTO> GetLessonDetailedById(int id, CancellationToken cancellationToken)
         {
             var lesson = await GetLessonById(id, cancellationToken);
 
@@ -198,7 +198,7 @@ namespace Schedule_App.API.Services
             }
 
             // Changing state of timestamp's
-            await _repository.DeleteSoft<Lesson>(lesson);
+            await _repository.DeleteSoft<Lesson>(lesson, cancellationToken);
 
             await _repository.SaveChanges(cancellationToken);
         }

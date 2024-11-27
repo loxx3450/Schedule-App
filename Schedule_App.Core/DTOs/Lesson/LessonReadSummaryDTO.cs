@@ -25,7 +25,7 @@ namespace Schedule_App.Core.DTOs.Lesson
 
         public TeacherReadSummaryDTO Teacher { get; set; } = null!;
 
-        public string? AdditionalInfo { get; set; }
+        public string? AdditionalInfo { get; set; } = null;
 
         public DateTime StartsAt { get; set; }
 

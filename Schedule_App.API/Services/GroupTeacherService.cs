@@ -19,18 +19,18 @@ namespace Schedule_App.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<GroupTeacherReadDTO>> GetGroupTeacherInfos(int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<GroupTeacherReadDTO>> GetGroupTeacherAssociations(int offset, int limit, CancellationToken cancellationToken)
         {
             var result = await GetActualGroupTeacherInfos()
                 .AsNoTracking()
-                .Skip(skip)
-                .Take(take)
+                .Skip(offset)
+                .Take(limit)
                 .ToArrayAsync(cancellationToken);
 
             return _mapper.Map<IEnumerable<GroupTeacherReadDTO>>(result);
         }
 
-        public async Task<GroupTeacherReadDTO> GetGroupTeacherInfo(int groupId, int teacherId, CancellationToken cancellationToken)
+        public async Task<GroupTeacherReadDTO> GetGroupTeacherAssociation(int groupId, int teacherId, CancellationToken cancellationToken)
         {
             var result = await GetActualGroupTeacherInfos()
                 .AsNoTracking()
@@ -39,7 +39,7 @@ namespace Schedule_App.API.Services
             return _mapper.Map<GroupTeacherReadDTO>(result);
         }
 
-        public async Task<IEnumerable<GroupTeacherReadDTO>> GetGroupsByTeacherId(int teacherId, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<GroupTeacherReadDTO>> GetGroupsByTeacherId(int teacherId, int offset, int limit, CancellationToken cancellationToken)
         {
             var result = await GetActualGroupTeacherInfos()
                 .AsNoTracking()
@@ -50,14 +50,14 @@ namespace Schedule_App.API.Services
                     CreatedAt = gt.CreatedAt,
                     UpdatedAt = gt.UpdatedAt,
                 })
-                .Skip(skip)
-                .Take(take)
+                .Skip(offset)
+                .Take(limit)
                 .ToArrayAsync(cancellationToken);
 
             return _mapper.Map<IEnumerable<GroupTeacherReadDTO>>(result);
         }
 
-        public async Task<IEnumerable<GroupTeacherReadDTO>> GetTeachersByGroupId(int groupId, int skip, int take, CancellationToken cancellationToken)
+        public async Task<IEnumerable<GroupTeacherReadDTO>> GetTeachersByGroupId(int groupId, int offset, int limit, CancellationToken cancellationToken)
         {
             var result = await GetActualGroupTeacherInfos()
                 .AsNoTracking()
@@ -68,8 +68,8 @@ namespace Schedule_App.API.Services
                     CreatedAt = gt.CreatedAt,
                     UpdatedAt = gt.UpdatedAt,
                 })
-                .Skip(skip)
-                .Take(take)
+                .Skip(offset)
+                .Take(limit)
                 .ToArrayAsync(cancellationToken);
 
             return _mapper.Map<IEnumerable<GroupTeacherReadDTO>>(result);
@@ -133,7 +133,7 @@ namespace Schedule_App.API.Services
             }
 
             // Changing state of timestamp's
-            await _repository.DeleteSoft<GroupTeacher>(groupTeacher);
+            await _repository.DeleteSoft<GroupTeacher>(groupTeacher, cancellationToken);
 
             await _repository.SaveChanges(cancellationToken);
         }

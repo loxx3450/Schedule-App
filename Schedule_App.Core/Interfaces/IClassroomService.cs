@@ -10,14 +10,14 @@ namespace Schedule_App.Core.Interfaces
 {
     public interface IClassroomService
     {
-        Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummaries(int skip, int take, CancellationToken cancellationToken);
-        Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetails(int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummaries(int offset, int limit, CancellationToken cancellationToken);
+        Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailed(int offset, int limit, CancellationToken cancellationToken);
 
-        Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummariesByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken);
-        Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailsByFilter(ClassroomFilter filter, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummariesByFilter(ClassroomFilter filter, int offset, int limit, CancellationToken cancellationToken);
+        Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailedByFilter(ClassroomFilter filter, int offset, int limit, CancellationToken cancellationToken);
 
         Task<ClassroomReadSummaryDTO> GetClassroomSummaryById(int id, CancellationToken cancellationToken);
-        Task<ClassroomReadFullDTO> GetClassroomDetailsById(int id, CancellationToken cancellationToken);
+        Task<ClassroomReadFullDTO> GetClassroomDetailedById(int id, CancellationToken cancellationToken);
 
         Task<ClassroomReadSummaryDTO> AddClassroom(ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken);
 

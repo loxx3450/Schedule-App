@@ -11,18 +11,18 @@ namespace Schedule_App.Core.Interfaces
 {
     public interface ISubjectService
     {
-        Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummaries(int skip, int take, CancellationToken cancellationToken);
-        Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetails(int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummaries(int offset, int limit, CancellationToken cancellationToken);
+        Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailed(int offset, int limit, CancellationToken cancellationToken);
 
-        Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummariesByFilter(SubjectFilter filter, int skip, int take, CancellationToken cancellationToken);
-        Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailsByFilter(SubjectFilter filter, int skip, int take, CancellationToken cancellationToken);
+        Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummariesByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken);
+        Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailedByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken);
 
         Task<SubjectReadSummaryDTO> GetSubjectSummaryById(int id, CancellationToken cancellationToken);
-        Task<SubjectReadFullDTO> GetSubjectDetailsById(int id, CancellationToken cancellationToken);
+        Task<SubjectReadFullDTO> GetSubjectDetailedById(int id, CancellationToken cancellationToken);
 
         Task<SubjectReadSummaryDTO> AddSubject(SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken);
 
-        Task<SubjectReadSummaryDTO> UpdateSubjectTitle(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken);
+        Task<SubjectReadSummaryDTO> UpdateSubject(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken);
 
         Task DeleteSubject(int id, CancellationToken cancellationToken);
     }
