@@ -28,6 +28,23 @@ namespace Schedule_App.API.Extensions
                 };
 
                 opt.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
+
+                var securityRequirement = new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme()
+                        {
+                            Reference = new OpenApiReference()
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = JwtBearerDefaults.AuthenticationScheme
+                            }
+                        },
+                        []
+                    }
+                };
+
+                opt.AddSecurityRequirement(securityRequirement);
             });
 
             return services;
