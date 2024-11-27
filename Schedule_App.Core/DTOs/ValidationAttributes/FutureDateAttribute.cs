@@ -18,6 +18,7 @@ namespace Schedule_App.Core.DTOs.ValidationAttributes
             var currentValue = (DateOnly)value!;
 
             // Solves the problem of client having other time zone
+            // TODO: solve
             var yesterday = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
 
             if (currentValue < yesterday)

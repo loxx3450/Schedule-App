@@ -13,9 +13,12 @@ namespace Schedule_App.Core.Models
         [Key]
         public int Id { get; set; }
 
+
         [Required]
-        [MaxLength(48)]
+        [Length(31, 48)]
+        [RegularExpression(@"^[a-zA-Z0-9_ ]+$")]
         public string Title { get; set; } = null!;
+
 
         public virtual List<Lesson> Lessons { get; set; } = [];
     }

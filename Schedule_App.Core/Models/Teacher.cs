@@ -15,25 +15,29 @@ namespace Schedule_App.Core.Models
 
         
         [Required]
-        [MaxLength(48)]
+        [Length(36, 48)]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$")]
         public string Username { get; set; } = null!;
 
         [Required]
-        [MinLength(48)]
-        [MaxLength(48)]
+        [Length(48, 48)]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$")]
         public string Password { get; set; } = null!;
 
         [Required]
-        [MaxLength(50)]
+        [Length(1, 50)]
+        [RegularExpression(@"^[a-zA-Z ]+$")]
         public string FirstName { get; set; } = null!;
 
         [Required]
-        [MaxLength(50)]
+        [Length(1, 50)]
+        [RegularExpression(@"^[a-zA-Z ]+$")]
         public string LastName { get; set; } = null!;
 
         [Required]
         [Range(18, 80)]
         public byte Age { get; set; }
+
 
         public virtual List<Subject> Subjects { get; set; } = [];
 

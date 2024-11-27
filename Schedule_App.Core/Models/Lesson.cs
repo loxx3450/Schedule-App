@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Schedule_App.Core.DTOs.ValidationAttributes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,6 +13,7 @@ namespace Schedule_App.Core.Models
     {
         [Key]
         public int Id { get; set; }
+
 
         [Required]
         public short ClassroomId { get; set; }
@@ -38,6 +40,7 @@ namespace Schedule_App.Core.Models
         public DateTime StartsAt { get; set; }
 
         [Required]
+        [LaterThan(nameof(StartsAt))]
         public DateTime EndsAt { get; set; }
 
         [Required]

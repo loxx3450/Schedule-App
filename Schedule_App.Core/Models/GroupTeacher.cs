@@ -13,10 +13,10 @@ namespace Schedule_App.Core.Models
         [Key]
         public int Id { get; set; }
 
+
         [Required]
         public int GroupId { get; set; }
         public virtual Group Group { get; set; } = null!;
-
 
         [Required]
         public int TeacherId { get; set; }
