@@ -33,8 +33,6 @@ namespace Schedule_App.Core.DTOs.Lesson
 
         public DateTime EndsAt { get; set; }
 
-        public short StatusId { get; set; }
-
         public LessonStatusReadDTO Status { get; set; } = null!;
     }
 }

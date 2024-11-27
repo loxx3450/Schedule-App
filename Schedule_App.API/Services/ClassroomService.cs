@@ -126,6 +126,7 @@ namespace Schedule_App.API.Services
         public async Task DeleteClassroom(int id, CancellationToken cancellationToken)
         {
             var classroom = await _repository.GetAllNotDeleted<Classroom>()
+                .Include(c => c.Lessons)
                 .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
             if (classroom is null)
@@ -139,7 +140,20 @@ namespace Schedule_App.API.Services
             // Updating value for Unique Field
             classroom.Title = $"{classroom.Title}_deleted_{classroom.DeletedAt}";
 
+            await DeleteAssociatedLessons(classroom.Lessons, cancellationToken);
+
             await _repository.SaveChanges(cancellationToken);
+        }
+
+        private async Task DeleteAssociatedLessons(List<Lesson> lessons, CancellationToken cancellationToken)
+        {
+            foreach (var lesson in lessons)
+            {
+                if (lesson.DeletedAt is null)
+                {
+                    await _repository.DeleteSoft(lesson, cancellationToken);
+                }
+            }
         }
 
         private Task<bool> IsTitleTaken(string title, CancellationToken cancellationToken)

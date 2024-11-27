@@ -191,6 +191,7 @@ namespace Schedule_App.API.Services
         public async Task DeleteGroup(int id, CancellationToken cancellationToken = default)
         {
             var group = await _repository.GetAllNotDeleted<Group>()
+                .Include(g => g.Lessons)
                 .FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
 
             if (group is null)
@@ -207,7 +208,20 @@ namespace Schedule_App.API.Services
             // Soft Delete all records, that are associated with this Group
             await DeleteAssociationsWithTeachers(id);
 
+            await DeleteAssociatedLessons(group.Lessons, cancellationToken);
+
             await _repository.SaveChanges(cancellationToken);
+        }
+
+        private async Task DeleteAssociatedLessons(List<Lesson> lessons, CancellationToken cancellationToken)
+        {
+            foreach (var lesson in lessons)
+            {
+                if (lesson.DeletedAt is null)
+                {
+                    await _repository.DeleteSoft(lesson, cancellationToken);
+                }
+            }
         }
 
         private async Task DeleteAssociationsWithTeachers(int groupId)
