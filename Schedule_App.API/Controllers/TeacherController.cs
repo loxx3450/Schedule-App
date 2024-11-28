@@ -12,6 +12,7 @@ namespace Schedule_App.API.Controllers
     public class TeacherController : ControllerBase
     {
         private const string BASE_ENDPOINT = "api/teachers";
+
         private readonly ITeacherService _teacherService;
         private readonly ITeacherSubjectService _teacherSubjectService;
 
@@ -25,12 +26,12 @@ namespace Schedule_App.API.Controllers
         public async Task<ActionResult<IEnumerable<TeacherReadSummaryDTO>>> GetTeachers(
             [FromQuery] int offset = 0, 
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             IEnumerable<TeacherReadSummaryDTO> teachers;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 teachers = await _teacherService.GetTeachersDetailed(offset, limit, cancellationToken);
             }
@@ -49,7 +50,7 @@ namespace Schedule_App.API.Controllers
             [FromQuery] int? subjectId = null,
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             var teacherFilter = new TeacherFilter()
@@ -61,7 +62,7 @@ namespace Schedule_App.API.Controllers
 
             IEnumerable<TeacherReadSummaryDTO> teachers;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 teachers = await _teacherService.GetTeachersDetailedByFilter(teacherFilter, offset, limit, cancellationToken);
             }
@@ -76,12 +77,12 @@ namespace Schedule_App.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<TeacherReadSummaryDTO>> GetTeacherById(
             [FromRoute] int id,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             TeacherReadSummaryDTO teacher;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 teacher = await _teacherService.GetTeacherDetailedById(id, cancellationToken);
             }
@@ -96,13 +97,16 @@ namespace Schedule_App.API.Controllers
         [HttpPost]
         public async Task<ActionResult<TeacherReadSummaryDTO>> AddTeacher([FromBody] TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken)
         {
-            var result = await _teacherService.AddTeacher(teacherCreateDTO, cancellationToken);
+            var teacher = await _teacherService.AddTeacher(teacherCreateDTO, cancellationToken);
 
-            return Created($"{BASE_ENDPOINT}/{result.Id}", result);
+            return Created($"{BASE_ENDPOINT}/{teacher.Id}", teacher);
         }
 
         [HttpPost("{teacherId:int}/subject/{subjectId:int}")]
-        public async Task<ActionResult> AddSubjectToTeacher([FromRoute] int teacherId, [FromRoute] int subjectId, CancellationToken cancellationToken)
+        public async Task<ActionResult> AddSubjectToTeacher(
+            [FromRoute] int teacherId, 
+            [FromRoute] int subjectId, 
+            CancellationToken cancellationToken)
         {
             await _teacherSubjectService.AddSubjectToTeacher(teacherId, subjectId, cancellationToken);
 
@@ -110,11 +114,14 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpPatch("{id:int}")]
-        public async Task<ActionResult<TeacherReadSummaryDTO>> UpdateTeacher([FromRoute] int id, [FromBody] TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken)
+        public async Task<ActionResult<TeacherReadSummaryDTO>> UpdateTeacher(
+            [FromRoute] int id, 
+            [FromBody] TeacherUpdateDTO teacherUpdateDTO, 
+            CancellationToken cancellationToken)
         {
-            var result = await _teacherService.UpdateTeacher(id, teacherUpdateDTO, cancellationToken);
+            var teacher = await _teacherService.UpdateTeacher(id, teacherUpdateDTO, cancellationToken);
 
-            return Ok(result);
+            return Ok(teacher);
         }
 
         [HttpDelete("{id:int}")]
@@ -126,7 +133,10 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpDelete("{teacherId:int}/subject/{subjectId:int}")]
-        public async Task<ActionResult> RemoveSubjectFromTeacher([FromRoute] int teacherId, [FromRoute] int subjectId, CancellationToken cancellationToken)
+        public async Task<ActionResult> RemoveSubjectFromTeacher(
+            [FromRoute] int teacherId, 
+            [FromRoute] int subjectId, 
+            CancellationToken cancellationToken)
         {
             await _teacherSubjectService.RemoveSubjectFromTeacher(teacherId, subjectId, cancellationToken);
 

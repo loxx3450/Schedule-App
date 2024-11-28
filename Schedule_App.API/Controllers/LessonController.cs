@@ -15,6 +15,7 @@ namespace Schedule_App.API.Controllers
     public class LessonController : ControllerBase
     {
         private const string BASE_ENDPOINT = "lessons";
+
         private readonly ILessonService _lessonService;
 
         public LessonController(ILessonService lessonService)
@@ -26,12 +27,12 @@ namespace Schedule_App.API.Controllers
         public async Task<ActionResult<IEnumerable<LessonReadSummaryDTO>>> GetTeachers(
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             IEnumerable<LessonReadSummaryDTO> lessons;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 lessons = await _lessonService.GetLessonsDetailed(offset, limit, cancellationToken);
             }
@@ -45,15 +46,15 @@ namespace Schedule_App.API.Controllers
 
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<LessonReadSummaryDTO>>> GetTeachersByFilter(
-            [FromQuery] int? classroomId,
-            [FromQuery] int? subjectId,
-            [FromQuery] int? groupId,
-            [FromQuery] int? teacherId,
-            [FromQuery] DateOnly? date,
-            [FromQuery] int? statusId,
+            [FromQuery] int? classroomId = null,
+            [FromQuery] int? subjectId = null,
+            [FromQuery] int? groupId = null,
+            [FromQuery] int? teacherId = null,
+            [FromQuery] DateOnly? date = null,
+            [FromQuery] int? statusId = null,
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             var lessonFilter = new LessonFilter()
@@ -68,7 +69,7 @@ namespace Schedule_App.API.Controllers
 
             IEnumerable<LessonReadSummaryDTO> lessons;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 lessons = await _lessonService.GetLessonsDetailedByFilter(lessonFilter, offset, limit, cancellationToken);
             }
@@ -83,12 +84,12 @@ namespace Schedule_App.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<LessonReadSummaryDTO>> GetLessonById(
             [FromRoute] int id,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             LessonReadSummaryDTO lesson;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 lesson = await _lessonService.GetLessonDetailedById(id, cancellationToken);
             }   
@@ -109,7 +110,10 @@ namespace Schedule_App.API.Controllers
         }
 
         [HttpPatch("{id:int}")]
-        public async Task<ActionResult<LessonReadSummaryDTO>> UpdateLesson([FromRoute] int id, [FromBody] LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken)
+        public async Task<ActionResult<LessonReadSummaryDTO>> UpdateLesson(
+            [FromRoute] int id, 
+            [FromBody] LessonUpdateDTO lessonUpdateDTO, 
+            CancellationToken cancellationToken)
         {
             var lesson = await _lessonService.UpdateLesson(id, lessonUpdateDTO, cancellationToken);
 

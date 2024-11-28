@@ -14,6 +14,7 @@ namespace Schedule_App.API.Controllers
     public class ClassroomController : ControllerBase
     {
         private const string BASE_ENDPOINT = "api/classrooms";
+
         private readonly IClassroomService _classroomService;
 
         public ClassroomController(IClassroomService classroomService)
@@ -25,12 +26,12 @@ namespace Schedule_App.API.Controllers
         public async Task<ActionResult<IEnumerable<ClassroomReadSummaryDTO>>> GetClassrooms(
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             IEnumerable<ClassroomReadSummaryDTO> classrooms;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 classrooms = await _classroomService.GetClassroomsDetailed(offset, limit, cancellationToken);
             }
@@ -47,7 +48,7 @@ namespace Schedule_App.API.Controllers
             [FromQuery] string? title = null,
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             var classroomFilter = new ClassroomFilter()
@@ -57,7 +58,7 @@ namespace Schedule_App.API.Controllers
 
             IEnumerable<ClassroomReadSummaryDTO> classrooms;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 classrooms = await _classroomService.GetClassroomsDetailedByFilter(classroomFilter, offset, limit, cancellationToken);
             }
@@ -72,12 +73,12 @@ namespace Schedule_App.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ClassroomReadSummaryDTO>> GetClassroomById(
             [FromRoute] int id,
-            [FromQuery] bool withDetailed = false, 
+            [FromQuery] bool includeAuditInfo = false, 
             CancellationToken cancellationToken = default)
         {
             ClassroomReadSummaryDTO classroom;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 classroom = await _classroomService.GetClassroomDetailedById(id, cancellationToken);
             }

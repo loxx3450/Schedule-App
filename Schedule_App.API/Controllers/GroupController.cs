@@ -14,6 +14,7 @@ namespace Schedule_App.API.Controllers
     public class GroupController : ControllerBase
     {
         private const string BASE_ENDPOINT = "api/groups";
+
         private readonly IGroupService _groupService;
 
         public GroupController(IGroupService groupService)
@@ -26,12 +27,12 @@ namespace Schedule_App.API.Controllers
         public async Task<ActionResult<IEnumerable<GroupReadSummaryDTO>>> GetGroups(
             [FromQuery] int offset = 0, 
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             IEnumerable<GroupReadSummaryDTO> groups;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 groups = await _groupService.GetGroupsDetailed(offset, limit, cancellationToken);
             }
@@ -51,7 +52,7 @@ namespace Schedule_App.API.Controllers
             [FromQuery] int? teacherId = null,
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             var groupFilter = new GroupFilter()
@@ -63,7 +64,7 @@ namespace Schedule_App.API.Controllers
 
             IEnumerable<GroupReadSummaryDTO> groups;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 groups = await _groupService.GetGroupsDetailedByFilter(groupFilter, offset, limit, cancellationToken);
             }
@@ -79,12 +80,12 @@ namespace Schedule_App.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GroupReadSummaryDTO>> GetGroupById(
             [FromRoute] int id, 
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             GroupReadSummaryDTO group;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 group = await _groupService.GetGroupDetailedById(id, cancellationToken);
             }
@@ -98,11 +99,11 @@ namespace Schedule_App.API.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<GroupReadSummaryDTO>> AddGroup([FromBody] GroupCreateDTO group, CancellationToken cancellationToken)
+        public async Task<ActionResult<GroupReadSummaryDTO>> AddGroup([FromBody] GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken)
         {
-            var result = await _groupService.AddGroup(group, cancellationToken);
+            var group = await _groupService.AddGroup(groupCreateDTO, cancellationToken);
 
-            return Created($"{BASE_ENDPOINT}/{result.Id}", result);
+            return Created($"{BASE_ENDPOINT}/{group.Id}", group);
         }
 
 
@@ -112,9 +113,9 @@ namespace Schedule_App.API.Controllers
             [FromBody] GroupUpdateDTO groupUpdateDTO, 
             CancellationToken cancellationToken)
         {
-            var result = await _groupService.UpdateGroup(id, groupUpdateDTO, cancellationToken);
+            var group = await _groupService.UpdateGroup(id, groupUpdateDTO, cancellationToken);
 
-            return Ok(result);
+            return Ok(group);
         }
 
 

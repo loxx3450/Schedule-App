@@ -15,6 +15,7 @@ namespace Schedule_App.API.Controllers
     public class SubjectController : ControllerBase
     {
         private const string BASE_ENDPOINT = "api/subjects";
+
         private readonly ISubjectService _subjectService;
 
         public SubjectController(ISubjectService subjectService)
@@ -26,12 +27,12 @@ namespace Schedule_App.API.Controllers
         public async Task<ActionResult<IEnumerable<SubjectReadSummaryDTO>>> GetSubjects(
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             IEnumerable<SubjectReadSummaryDTO> subjects;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 subjects = await _subjectService.GetSubjectsDetailed(offset, limit, cancellationToken);
             }
@@ -49,7 +50,7 @@ namespace Schedule_App.API.Controllers
             [FromQuery] int? teacherId = null,
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
-            [FromQuery] bool withDetailed = false,
+            [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
             var subjectFilter = new SubjectFilter()
@@ -60,7 +61,7 @@ namespace Schedule_App.API.Controllers
 
             IEnumerable<SubjectReadSummaryDTO> subjects;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 subjects = await _subjectService.GetSubjectsDetailedByFilter(subjectFilter, offset, limit, cancellationToken);
             }
@@ -75,12 +76,12 @@ namespace Schedule_App.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<SubjectReadSummaryDTO>> GetSubjectById(
             [FromRoute] int id,
-            [FromQuery] bool withDetailed = false, 
+            [FromQuery] bool includeAuditInfo = false, 
             CancellationToken cancellationToken = default)
         {
             SubjectReadSummaryDTO subject;
 
-            if (withDetailed)
+            if (includeAuditInfo)
             {
                 subject = await _subjectService.GetSubjectDetailedById(id, cancellationToken);
             }
@@ -95,9 +96,9 @@ namespace Schedule_App.API.Controllers
         [HttpPost]
         public async Task<ActionResult<SubjectReadSummaryDTO>> AddSubject([FromBody] SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken)
         {
-            var result = await _subjectService.AddSubject(subjectCreateDTO, cancellationToken);
+            var subject = await _subjectService.AddSubject(subjectCreateDTO, cancellationToken);
 
-            return Created($"{BASE_ENDPOINT}/{result.Id}", result);
+            return Created($"{BASE_ENDPOINT}/{subject.Id}", subject);
         }
 
         [HttpPut("{id:int}")]
@@ -106,9 +107,9 @@ namespace Schedule_App.API.Controllers
             [FromBody] SubjectUpdateDTO subjectUpdateDTO,
             CancellationToken cancellationToken)
         {
-            var result = await _subjectService.UpdateSubject(id, subjectUpdateDTO, cancellationToken);
+            var subject = await _subjectService.UpdateSubject(id, subjectUpdateDTO, cancellationToken);
 
-            return Ok(result);
+            return Ok(subject);
         }
 
         [HttpDelete("{id:int}")]
