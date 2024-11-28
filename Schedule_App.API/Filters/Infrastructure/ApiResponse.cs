@@ -1,4 +1,4 @@
-﻿namespace Schedule_App.API.Helpers
+﻿namespace Schedule_App.API.Filters.Infrastructure
 {
     public class ApiResponse<T>
     {

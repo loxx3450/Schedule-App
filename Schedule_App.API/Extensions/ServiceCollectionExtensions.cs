@@ -9,13 +9,6 @@ namespace Schedule_App.API.Extensions
         {
             services.AddSwaggerGen(opt =>
             {
-                // DateOnly properties should be provided as strings
-                opt.MapType<DateOnly>(() => new OpenApiSchema()
-                {
-                    Type = "string",
-                    Format = "date"
-                });
-
                 // Adds authorization feature
                 var securityScheme = new OpenApiSecurityScheme()
                 {

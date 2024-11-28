@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Schedule_App.API.Helpers;
+using Schedule_App.API.Filters.Infrastructure;
 
 namespace Schedule_App.API.Filters
 {
