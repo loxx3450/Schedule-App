@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Schedule_App.Core.DTOs.Auth;
 using Schedule_App.Core.DTOs.Group;
 using Schedule_App.Core.DTOs.Teacher;
-using Schedule_App.Core.Interfaces;
+using Schedule_App.Core.Interfaces.Services;
 
 namespace Schedule_App.API.Controllers
 {

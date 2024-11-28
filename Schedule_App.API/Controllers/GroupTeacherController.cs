@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Schedule_App.Core.DTOs.GroupTeacher;
-using Schedule_App.Core.Interfaces;
+using Schedule_App.Core.Interfaces.Services;
 
 namespace Schedule_App.API.Controllers
 {

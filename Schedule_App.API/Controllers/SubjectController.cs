@@ -5,7 +5,7 @@ using Schedule_App.API.Services;
 using Schedule_App.Core.DTOs.Group;
 using Schedule_App.Core.DTOs.Subject;
 using Schedule_App.Core.Filters;
-using Schedule_App.Core.Interfaces;
+using Schedule_App.Core.Interfaces.Services;
 
 namespace Schedule_App.API.Controllers
 {

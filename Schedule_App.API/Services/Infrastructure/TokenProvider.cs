@@ -4,7 +4,7 @@ using Schedule_App.Core.Models;
 using System.Security.Claims;
 using System.Text;
 
-namespace Schedule_App.API.Helpers
+namespace Schedule_App.API.Services.Infrastructure
 {
     public class TokenProvider
     {

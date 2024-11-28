@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schedule_App.Core", "Schedu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schedule_App.Storage", "Schedule_App.Storage\Schedule_App.Storage.csproj", "{ED297337-0CF0-47C0-8D55-920647E61F16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schedule_App.Tests", "Schedule_App.Tests\Schedule_App.Tests.csproj", "{A76483B4-499F-4439-AA9C-19670A4C2588}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schedule_App.Tests", "Schedule_App.Tests\Schedule_App.Tests.csproj", "{A76483B4-499F-4439-AA9C-19670A4C2588}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,11 +4,12 @@ using Schedule_App.API.Filters;
 using Schedule_App.API.Services;
 using Schedule_App.Core.Interfaces;
 using Schedule_App.Storage;
-using Schedule_App.API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Schedule_App.API.Extensions;
+using Schedule_App.API.Services.Infrastructure;
+using Schedule_App.Core.Interfaces.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Helpers
 builder.Services.AddSingleton<TokenProvider>();
+builder.Services.AddScoped<IDataHelper, DataHelper>();
 
 builder.Services.AddControllers(opt =>
 {
@@ -52,6 +54,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 
+// Cofiguring JWT Bearer Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
     {

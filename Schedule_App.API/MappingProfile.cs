@@ -23,7 +23,6 @@ namespace Schedule_App.API
             CreateMap<Teacher, TeacherReadSummaryDTO>().ReverseMap();
             CreateMap<Teacher, TeacherReadFullDTO>().ReverseMap();
             CreateMap<Teacher, TeacherCreateDTO>().ReverseMap();
-            CreateMap<Teacher, TeacherUpdateDTO>().ReverseMap();
 
             CreateMap<GroupTeacher, GroupTeacherReadDTO>().ReverseMap();
 

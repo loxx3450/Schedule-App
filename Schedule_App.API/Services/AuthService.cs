@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Schedule_App.API.Helpers;
+using Schedule_App.API.Services.Infrastructure;
 using Schedule_App.Core.DTOs.Auth;
 using Schedule_App.Core.DTOs.Teacher;
 using Schedule_App.Core.Interfaces;
+using Schedule_App.Core.Interfaces.Services;
 using Schedule_App.Core.Models;
 using System.Security.Claims;
 using System.Text;
@@ -24,6 +25,7 @@ namespace Schedule_App.API.Services
         public async Task<AuthResponse> Login(TeacherLoginDTO loginDTO, CancellationToken cancellationToken)
         {
             var teacher = await _repository.GetAllNotDeleted<Teacher>()
+                .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Username == loginDTO.Username, cancellationToken);
 
             // If teacher with this Username exists

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Schedule_App.API.Services.Infrastructure;
 using Schedule_App.Core.DTOs.Lesson;
 using Schedule_App.Core.Filters;
 using Schedule_App.Core.Interfaces;
+using Schedule_App.Core.Interfaces.Services;
 using Schedule_App.Core.Models;
 using Schedule_App.Storage;
 
@@ -12,13 +14,16 @@ namespace Schedule_App.API.Services
     {
         private readonly IRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IDataHelper _dataHelper;
 
-        public LessonService(IRepository repository, IMapper mapper)
+        public LessonService(IRepository repository, IMapper mapper, IDataHelper dataHelper)
         {
             _repository = repository;
             _mapper = mapper;
+            _dataHelper = dataHelper;
         }
 
+        #region Read
         public async Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummaries(int offset, int limit, CancellationToken cancellationToken)
         {
             var lessons = await GetLessons(offset, limit, cancellationToken);
@@ -42,9 +47,11 @@ namespace Schedule_App.API.Services
                 .ToArrayAsync(cancellationToken);
         }
 
+
+
         public async Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummariesByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
-             var lessons = await GetLessonsByFilter(filter, offset, limit, cancellationToken);
+            var lessons = await GetLessonsByFilter(filter, offset, limit, cancellationToken);
 
             return _mapper.Map<IEnumerable<LessonReadSummaryDTO>>(lessons);
         }
@@ -61,7 +68,8 @@ namespace Schedule_App.API.Services
             var lessons = _repository.GetAllNotDeleted<Lesson>()
                 .AsNoTracking();
 
-            lessons = lessons.Where(l => 
+            // Filtering lessons
+            lessons = lessons.Where(l =>
                 (filter.StartDate == null || DateOnly.FromDateTime(l.StartsAt) == filter.StartDate) &&
                 (filter.ClassroomId == null || l.ClassroomId == filter.ClassroomId) &&
                 (filter.SubjectId == null || l.SubjectId == filter.SubjectId) &&
@@ -73,6 +81,8 @@ namespace Schedule_App.API.Services
                 .Take(limit)
                 .ToArrayAsync(cancellationToken);
         }
+
+
 
         public async Task<LessonReadSummaryDTO> GetLessonSummaryById(int id, CancellationToken cancellationToken)
         {
@@ -89,18 +99,16 @@ namespace Schedule_App.API.Services
 
         private async Task<Lesson> GetLessonById(int id, CancellationToken cancellationToken)
         {
-            var lesson = await _repository.GetAllNotDeleted<Lesson>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+            var lesson = await _dataHelper.GetAuditableEntityByIdAsNoTracking<Lesson>(id, cancellationToken);
 
-            if (lesson is null)
-            {
-                throw new KeyNotFoundException($"Lesson with ID '{id}' is not found");
-            }
+            // Checks if Lesson exists
+            EntityValidator.EnsureEntityExists(lesson, nameof(lesson.Id), id);
 
-            return lesson;
+            return lesson!;
         }
+        #endregion
 
+        #region Create
         public async Task<LessonReadSummaryDTO> AddLesson(LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken)
         {
             await ValidateCreateDTO(lessonCreateDTO, cancellationToken);
@@ -108,7 +116,6 @@ namespace Schedule_App.API.Services
             var lesson = _mapper.Map<Lesson>(lessonCreateDTO);
 
             await _repository.AddAuditableEntity(lesson, cancellationToken);
-
             await _repository.SaveChanges(cancellationToken);
 
             // To return DTO with filled DTOs in properties
@@ -117,60 +124,29 @@ namespace Schedule_App.API.Services
             return _mapper.Map<LessonReadSummaryDTO>(result);
         }
 
-        // TODO: Refactor ?Some helper?
+        // Checks if income FKs reference to existing entities
         private async Task ValidateCreateDTO(LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken)
         {
-            var classroomIsFound = await _repository.GetAllNotDeleted<Classroom>()
-                .AnyAsync(c => c.Id == lessonCreateDTO.ClassroomId, cancellationToken);
+            await _dataHelper.EnsureAuditableEntityExistsById<Classroom>(lessonCreateDTO.ClassroomId, cancellationToken);
 
-            if (!classroomIsFound)
-            {
-                throw new ArgumentException($"Classroom with ID '{lessonCreateDTO.ClassroomId}' is not found");
-            }
+            await _dataHelper.EnsureAuditableEntityExistsById<Subject>(lessonCreateDTO.SubjectId, cancellationToken);
 
-            var subjectIsFound = await _repository.GetAllNotDeleted<Subject>()
-                .AnyAsync(c => c.Id == lessonCreateDTO.SubjectId, cancellationToken);
+            await _dataHelper.EnsureAuditableEntityExistsById<Group>(lessonCreateDTO.GroupId, cancellationToken);
 
-            if (!subjectIsFound)
-            {
-                throw new ArgumentException($"Subject with ID '{lessonCreateDTO.SubjectId}' is not found");
-            }
+            await _dataHelper.EnsureAuditableEntityExistsById<Teacher>(lessonCreateDTO.TeacherId, cancellationToken);
 
-            var groupIsFound = await _repository.GetAllNotDeleted<Group>()
-                .AnyAsync(c => c.Id == lessonCreateDTO.GroupId, cancellationToken);
-
-            if (!groupIsFound)
-            {
-                throw new ArgumentException($"Group with ID '{lessonCreateDTO.GroupId}' is not found");
-            }
-
-            var teacherIsFound = await _repository.GetAllNotDeleted<Teacher>()
-                .AnyAsync(c => c.Id == lessonCreateDTO.TeacherId, cancellationToken);
-
-            if (!teacherIsFound)
-            {
-                throw new ArgumentException($"Teacher with ID '{lessonCreateDTO.TeacherId}' is not found");
-            }
-
-            var statusIsFound = await _repository.GetAll<LessonStatus>()
-                .AnyAsync(c => c.Id == lessonCreateDTO.StatusId, cancellationToken);
-
-            if (!statusIsFound)
-            {
-                throw new ArgumentException($"LessonStatus with ID '{lessonCreateDTO.StatusId}' is not found");
-            }
+            await _dataHelper.EnsureEntityExistsById<LessonStatus>(lessonCreateDTO.StatusId, cancellationToken);
         }
+        #endregion
 
+        #region Update
         public async Task<LessonReadSummaryDTO> UpdateLesson(int id, LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken)
         {
-            var lesson = await _repository.GetAllNotDeleted<Lesson>()
-                .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+            await ValidateUpdateDTO(lessonUpdateDTO, cancellationToken);
 
-            if (lesson is null)
-            {
-                throw new KeyNotFoundException($"Lesson with ID '{id}' is not found");
-            }
+            var lesson = await GetLessonById(id, cancellationToken);
 
+            // Updating Lesson
             lesson.ClassroomId = lessonUpdateDTO.ClassroomId ?? lesson.ClassroomId;
             lesson.SubjectId = lessonUpdateDTO.SubjectId ?? lesson.SubjectId;
             lesson.GroupId = lessonUpdateDTO.GroupId ?? lesson.GroupId;
@@ -187,20 +163,35 @@ namespace Schedule_App.API.Services
             return _mapper.Map<LessonReadSummaryDTO>(lesson);
         }
 
+        // Checks if income FKs (in case they are given) reference to existing entities
+        private async Task ValidateUpdateDTO(LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken)
+        {
+            if (lessonUpdateDTO.ClassroomId is not null)
+                await _dataHelper.EnsureAuditableEntityExistsById<Classroom>(lessonUpdateDTO.ClassroomId.Value, cancellationToken);
+
+            if (lessonUpdateDTO.SubjectId is not null)
+                await _dataHelper.EnsureAuditableEntityExistsById<Subject>(lessonUpdateDTO.SubjectId.Value, cancellationToken);
+
+            if (lessonUpdateDTO.GroupId is not null)
+                await _dataHelper.EnsureAuditableEntityExistsById<Group>(lessonUpdateDTO.GroupId.Value, cancellationToken);
+
+            if (lessonUpdateDTO.TeacherId is not null)
+                await _dataHelper.EnsureAuditableEntityExistsById<Teacher>(lessonUpdateDTO.TeacherId.Value, cancellationToken);
+
+            if (lessonUpdateDTO.StatusId is not null)
+                await _dataHelper.EnsureEntityExistsById<LessonStatus>(lessonUpdateDTO.StatusId.Value, cancellationToken);
+        }
+        #endregion
+
+        #region Delete
         public async Task DeleteLesson(int id, CancellationToken cancellationToken)
         {
-            var lesson = await _repository.GetAllNotDeleted<Lesson>()
-                .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
-
-            if (lesson is null)
-            {
-                throw new KeyNotFoundException($"Lesson with ID '{id}' is not found");
-            }
+            var lesson = await GetLessonById(id, cancellationToken);
 
             // Changing state of timestamp's
-            await _repository.DeleteSoft<Lesson>(lesson, cancellationToken);
-
+            await _repository.DeleteSoft(lesson, cancellationToken);
             await _repository.SaveChanges(cancellationToken);
         }
+        #endregion
     }
 }

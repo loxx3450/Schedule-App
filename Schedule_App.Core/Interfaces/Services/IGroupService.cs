@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Schedule_App.Core.Interfaces
+namespace Schedule_App.Core.Interfaces.Services
 {
     public interface IGroupService
     {

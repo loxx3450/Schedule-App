@@ -4,7 +4,7 @@ using Schedule_App.API.Services;
 using Schedule_App.Core.DTOs.Lesson;
 using Schedule_App.Core.DTOs.Teacher;
 using Schedule_App.Core.Filters;
-using Schedule_App.Core.Interfaces;
+using Schedule_App.Core.Interfaces.Services;
 using Schedule_App.Core.Models;
 
 namespace Schedule_App.API.Controllers

@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Schedule_App.API.DTOs.LessonStatus;
+using Schedule_App.API.Services.Infrastructure;
 using Schedule_App.Core.Interfaces;
+using Schedule_App.Core.Interfaces.Services;
 using Schedule_App.Core.Models;
 
 namespace Schedule_App.API.Services
@@ -10,14 +12,16 @@ namespace Schedule_App.API.Services
     {
         private readonly IRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IDataHelper _dataHelper;
 
-        public LessonStatusService(IRepository repository, IMapper mapper)
+        public LessonStatusService(IRepository repository, IMapper mapper, IDataHelper dataHelper)
         {
             _repository = repository;
             _mapper = mapper;
+            _dataHelper = dataHelper;
         }
 
-        public async Task<IEnumerable<LessonStatusReadDTO>> GetLessonStatuses(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<LessonStatusReadDTO>> GetLessonStatuses(CancellationToken cancellationToken)
         {
             var lessonStatuses = await _repository.GetAll<LessonStatus>()
                 .AsNoTracking()
@@ -26,14 +30,12 @@ namespace Schedule_App.API.Services
             return _mapper.Map<IEnumerable<LessonStatusReadDTO>>(lessonStatuses);
         }
 
-        public async Task<LessonStatusReadDTO> GetLessonStatusById(int id, CancellationToken cancellationToken = default)
+        public async Task<LessonStatusReadDTO> GetLessonStatusById(int id, CancellationToken cancellationToken)
         {
-            var lessonStatus = await _repository.GetAll<LessonStatus>().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+            var lessonStatus = await _dataHelper.GetEntityByIdAsNoTracking<LessonStatus>(id, cancellationToken);
 
-            if (lessonStatus is null)
-            {
-                throw new KeyNotFoundException($"Lesson status with ID {id} is not found");
-            }
+            // Checks if LessonStatus exists
+            EntityValidator.EnsureEntityExists(lessonStatus, nameof(lessonStatus.Id), id);
 
             return _mapper.Map<LessonStatusReadDTO>(lessonStatus);
         }

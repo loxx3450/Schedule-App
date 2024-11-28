@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Schedule_App.API.Helpers
+namespace Schedule_App.API.Services.Infrastructure
 {
     /// <summary>
     /// Hashes password with PBKDF2 and salt.
