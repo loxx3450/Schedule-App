@@ -104,7 +104,9 @@ namespace Schedule_App.Tests.Tests
         {
             var repository = new MockRepository(context);
 
-            return new LessonStatusService(repository, _mapper, GetDataHelper(repository));
+            var dataHelper = new MockDataHelper(repository);
+
+            return new LessonStatusService(repository, _mapper, dataHelper);
         }
     }
 }

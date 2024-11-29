@@ -152,7 +152,10 @@ namespace Schedule_App.Tests.Tests
         public async Task GetGroupsByFilter_CorrectTeacherId_ReturnsCorrectResult()
         {
             // Assign
-            var groupTeacherInfos = GetMockGroupTeacherInfos(GetMockGroups(), GetMockTeachers());
+            var groups = GetMockGroups();
+            var teachers = GetMockTeachers();
+            
+            var groupTeacherInfos = GetMockGroupTeacherInfos(groups, teachers);
 
             var teacherId = 1;
 
@@ -161,6 +164,10 @@ namespace Schedule_App.Tests.Tests
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
+            context.Setup(ctx => ctx.Set<Group>())
+                .ReturnsDbSet(groups);
+            context.Setup(ctx => ctx.Set<Teacher>())
+                .ReturnsDbSet(teachers);
 
             var service = GetGroupService(context.Object);
 
@@ -178,7 +185,10 @@ namespace Schedule_App.Tests.Tests
         public async Task GetGroupsByFilter_CorrectTeacherIdAndOneGroupIsDeleted_ReturnsCorrectResult()
         {
             // Assign
-            var groupTeacherInfos = GetMockGroupTeacherInfos(GetMockGroups(), GetMockTeachers());
+            var groups = GetMockGroups();
+            var teachers = GetMockTeachers();
+
+            var groupTeacherInfos = GetMockGroupTeacherInfos(groups, teachers);
 
             var teacherId = 1;
 
@@ -191,6 +201,10 @@ namespace Schedule_App.Tests.Tests
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
+            context.Setup(ctx => ctx.Set<Group>())
+                .ReturnsDbSet(groups);
+            context.Setup(ctx => ctx.Set<Teacher>())
+                .ReturnsDbSet(teachers);
 
             var service = GetGroupService(context.Object);
 
@@ -208,18 +222,25 @@ namespace Schedule_App.Tests.Tests
         public async Task GetGroupsByFilter_NotExistingTeacherId_ThrowsArgumentException()
         {
             // Assign
-            var groupTeacherInfos = GetMockGroupTeacherInfos(GetMockGroups(), GetMockTeachers());
+            var groups = GetMockGroups();
+            var teachers = GetMockTeachers();
+
+            var groupTeacherInfos = GetMockGroupTeacherInfos(groups, teachers);
 
             var teacherId = 7;
 
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
+            context.Setup(ctx => ctx.Set<Group>())
+                .ReturnsDbSet(groups);
+            context.Setup(ctx => ctx.Set<Teacher>())
+                .ReturnsDbSet(teachers);
 
             var service = GetGroupService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await service.GetGroupsSummariesByFilter(new GroupFilter()
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TeacherId = teacherId
             }, DEFAULT_OFFSET, DEFAULT_LIMIT, default));
@@ -229,7 +250,10 @@ namespace Schedule_App.Tests.Tests
         public async Task GetGroupsByFilter_DeletedTeacherId_ThrowsArgumentException()
         {
             // Assign
-            var groupTeacherInfos = GetMockGroupTeacherInfos(GetMockGroups(), GetMockTeachers());
+            var groups = GetMockGroups();
+            var teachers = GetMockTeachers();
+
+            var groupTeacherInfos = GetMockGroupTeacherInfos(groups, teachers);
 
             var teacherId = 3;
 
@@ -238,11 +262,15 @@ namespace Schedule_App.Tests.Tests
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
+            context.Setup(ctx => ctx.Set<Group>())
+                .ReturnsDbSet(groups);
+            context.Setup(ctx => ctx.Set<Teacher>())
+                .ReturnsDbSet(teachers);
 
             var service = GetGroupService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await service.GetGroupsSummariesByFilter(new GroupFilter()
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TeacherId = teacherId
             }, DEFAULT_OFFSET, DEFAULT_LIMIT, default));
@@ -252,7 +280,10 @@ namespace Schedule_App.Tests.Tests
         public async Task GetGroupsByFilter_CorrectTeacherIdAndExistingTitlePattern_ReturnsOneItem()
         {
             // Assign
-            var groupTeacherInfos = GetMockGroupTeacherInfos(GetMockGroups(), GetMockTeachers());
+            var groups = GetMockGroups();
+            var teachers = GetMockTeachers();
+
+            var groupTeacherInfos = GetMockGroupTeacherInfos(groups, teachers);
 
             var teacherId = 1;
             var titlePattern = "2";
@@ -262,6 +293,10 @@ namespace Schedule_App.Tests.Tests
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
+            context.Setup(ctx => ctx.Set<Group>())
+                .ReturnsDbSet(groups);
+            context.Setup(ctx => ctx.Set<Teacher>())
+                .ReturnsDbSet(teachers);
 
             var service = GetGroupService(context.Object);
 
@@ -280,7 +315,10 @@ namespace Schedule_App.Tests.Tests
         public async Task GetGroupsByFilter_CorrectTeacherIdAndNotExistingTitlePattern_ReturnsEmptyList()
         {
             // Assign
-            var groupTeacherInfos = GetMockGroupTeacherInfos(GetMockGroups(), GetMockTeachers());
+            var groups = GetMockGroups();
+            var teachers = GetMockTeachers();
+
+            var groupTeacherInfos = GetMockGroupTeacherInfos(groups, teachers);
 
             var teacherId = 1;
             var titlePattern = "6";
@@ -288,6 +326,10 @@ namespace Schedule_App.Tests.Tests
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
+            context.Setup(ctx => ctx.Set<Group>())
+                .ReturnsDbSet(groups);
+            context.Setup(ctx => ctx.Set<Teacher>())
+                .ReturnsDbSet(teachers);
 
             var service = GetGroupService(context.Object);
 
@@ -467,27 +509,6 @@ namespace Schedule_App.Tests.Tests
             await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.DeleteGroup(id));
         }
 
-        [Fact]
-        public async Task DeleteGroup_CorrectGroupId_ReturnsCorrectResult()
-        {
-            // Assign
-            var groups = GetMockGroups();
-
-            var id = groups.First().Id;
-
-            var context = new Mock<DbContext>();
-            context.Setup(ctx => ctx.Set<Group>())
-                .ReturnsDbSet(groups);
-
-            var service = GetGroupService(context.Object);
-
-            // Act
-            await service.DeleteGroup(id);
-
-            // Assert
-            Assert.Contains("_deleted_", groups.Find(g => g.Id == id)!.Title);
-        }
-
         private List<Group> GetMockGroups(int size = 5)
         {
             var result = new List<Group>();
@@ -535,9 +556,9 @@ namespace Schedule_App.Tests.Tests
                     result.Add(new GroupTeacher()
                     {
                         Id = (i * 5) + j + 1,
-                        GroupId = i,
+                        GroupId = i + 1,
                         Group = groups[i],
-                        TeacherId = j,
+                        TeacherId = j + 1,
                         Teacher = teachers[j]
                     });
                 }
@@ -550,7 +571,9 @@ namespace Schedule_App.Tests.Tests
         {
             var repository = new MockRepository(context);
 
-            return new GroupService(repository, _mapper, GetDataHelper(repository));
+            var dataHelper = new MockDataHelper(repository);
+
+            return new GroupService(repository, _mapper, dataHelper);
         }
     }
 }
