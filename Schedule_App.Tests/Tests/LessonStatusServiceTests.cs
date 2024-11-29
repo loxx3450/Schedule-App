@@ -29,10 +29,10 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<LessonStatus>())
                 .ReturnsDbSet(lessonStatuses);
 
-            var service = new LessonStatusService(new MockRepository(context.Object), _mapper);
+            var service = GetLessonStatusService(context.Object);
 
             // Act
-            var result = (await service.GetLessonStatuses()).ToList();
+            var result = (await service.GetLessonStatuses(default)).ToList();
 
             // Assert
             Assert.Equal(expected.Count, result.Count);
@@ -56,10 +56,10 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<LessonStatus>())
                 .ReturnsDbSet(lessonStatuses);
 
-            var service = new LessonStatusService(new MockRepository(context.Object), _mapper);
+            var service = GetLessonStatusService(context.Object);
 
             // Act
-            var result = await service.GetLessonStatusById(searchedId);
+            var result = await service.GetLessonStatusById(searchedId, default);
 
             // Assert
             Assert.Equal(expected, result, new LessonStatusComparer());
@@ -78,17 +78,17 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<LessonStatus>())
                 .ReturnsDbSet(lessonStatuses);
 
-            var service = new LessonStatusService(new MockRepository(context.Object), _mapper);
+            var service = GetLessonStatusService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.GetLessonStatusById(searchedId));
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.GetLessonStatusById(searchedId, default));
         }
 
         private List<LessonStatus> GetMockLessonStatuses()
         {
             var result = new List<LessonStatus>();
 
-            for (short i = 1; i <= 5; ++i)
+            for (int i = 1; i <= 5; ++i)
             {
                 result.Add(new LessonStatus()
                 {
@@ -98,6 +98,15 @@ namespace Schedule_App.Tests.Tests
             }
 
             return result;
+        }
+
+        private LessonStatusService GetLessonStatusService(DbContext context)
+        {
+            var repository = new MockRepository(context);
+
+            var dataHelper = new MockDataHelper(repository);
+
+            return new LessonStatusService(repository, _mapper, dataHelper);
         }
     }
 }
