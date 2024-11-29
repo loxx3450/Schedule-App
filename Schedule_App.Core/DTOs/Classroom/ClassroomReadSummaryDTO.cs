@@ -10,7 +10,7 @@ namespace Schedule_App.Core.DTOs.Classroom
 {
     public class ClassroomReadSummaryDTO
     {
-        public short Id { get; set; }
+        public int Id { get; set; }
 
         public string Title { get; set; } = null!;
     }

@@ -16,11 +16,11 @@ namespace Schedule_App.Core.Models
 
 
         [Required]
-        public short ClassroomId { get; set; }
+        public int ClassroomId { get; set; }
         public virtual Classroom Classroom { get; set; } = null!;
 
         [Required]
-        public short SubjectId { get; set; }
+        public int SubjectId { get; set; }
         public virtual Subject Subject { get; set; } = null!;
 
         [Required]
@@ -42,7 +42,7 @@ namespace Schedule_App.Core.Models
         public DateTime EndsAt { get; set; }
 
         [Required]
-        public short StatusId { get; set; }
+        public int StatusId { get; set; }
         public virtual LessonStatus Status { get; set; } = null!;
     }
 }

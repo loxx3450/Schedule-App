@@ -10,7 +10,7 @@ namespace Schedule_App.Core.Models
     public class LessonStatus
     {
         [Key]
-        public short Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [MaxLength(50)]

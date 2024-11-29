@@ -12,12 +12,12 @@ namespace Schedule_App.Core.DTOs.Lesson
     public class LessonUpdateDTO
     {
         [DefaultValue(-1)]
-        [Range(1, short.MaxValue, ErrorMessage = "The Classroom's id must be a positive integer greater than zero.")]
-        public short? ClassroomId { get; set; } = null;
+        [Range(1, int.MaxValue, ErrorMessage = "The Classroom's id must be a positive integer greater than zero.")]
+        public int? ClassroomId { get; set; } = null;
 
         [DefaultValue(-1)]
-        [Range(1, short.MaxValue, ErrorMessage = "The Subject's id must be a positive integer greater than zero.")]
-        public short? SubjectId { get; set; } = null;
+        [Range(1, int.MaxValue, ErrorMessage = "The Subject's id must be a positive integer greater than zero.")]
+        public int? SubjectId { get; set; } = null;
 
         [DefaultValue(-1)]
         [Range(1, int.MaxValue, ErrorMessage = "The Group's id must be a positive integer greater than zero.")]
@@ -39,7 +39,7 @@ namespace Schedule_App.Core.DTOs.Lesson
         public DateTime? EndsAt { get; set; } = null;
 
         [DefaultValue(-1)]
-        [Range(1, short.MaxValue, ErrorMessage = "The Status's id must be a positive integer greater than zero.")]
-        public short? StatusId { get; set; } = null;
+        [Range(1, int.MaxValue, ErrorMessage = "The Status's id must be a positive integer greater than zero.")]
+        public int? StatusId { get; set; } = null;
     }
 }

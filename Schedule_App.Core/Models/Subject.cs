@@ -11,7 +11,7 @@ namespace Schedule_App.Core.Models
     public class Subject : AuditableEntity
     {
         [Key]
-        public short Id { get; set; }
+        public int Id { get; set; }
 
 
         [Required]
