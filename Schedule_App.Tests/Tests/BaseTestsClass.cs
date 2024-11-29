@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Schedule_App.API;
+using Schedule_App.API.Services.Infrastructure;
+using Schedule_App.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +23,11 @@ namespace Schedule_App.Tests.Tests
             });
 
             _mapper = config.CreateMapper();
+        }
+
+        protected IDataHelper GetDataHelper(IRepository repository)
+        {
+            return new DataHelper(repository);
         }
     }
 }

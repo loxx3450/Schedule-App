@@ -19,22 +19,25 @@ namespace Schedule_App.Tests.Tests
 {
     public class GroupServiceTests : BaseTestsClass
     {
+        private const int DEFAULT_OFFSET = 0;
+        private const int DEFAULT_LIMIT = 20;
+
         [Fact]
         public async Task GetGroups_DefaultUsage_ReturnsCorrectResult()
         {
             // Assign
             var groups = GetMockGroups();
 
-            var expected = _mapper.Map<List<GroupReadDTO>>(groups);
+            var expected = _mapper.Map<List<GroupReadSummaryDTO>>(groups);
 
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = (await service.GetGroups()).ToList();
+            var result = (await service.GetGroupsSummaries(DEFAULT_OFFSET, DEFAULT_LIMIT, default)).ToList();
 
             // Assert
             Assert.Equal(expected.Count, result.Count);
@@ -59,10 +62,10 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroups(offset, limit);
+            var result = await service.GetGroupsSummaries(offset, limit, default);
 
             // Assert
             Assert.Equal(expectedCount, result.Count());
@@ -78,16 +81,16 @@ namespace Schedule_App.Tests.Tests
 
             groups.Find(g => g.Id == deletedId).DeletedAt = DateTime.UtcNow;
 
-            var expected = _mapper.Map<List<GroupReadDTO>>(groups.Where(g => g.Id != deletedId));
+            var expected = _mapper.Map<List<GroupReadSummaryDTO>>(groups.Where(g => g.Id != deletedId));
 
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = (await service.GetGroups()).ToList();
+            var result = (await service.GetGroupsSummaries(DEFAULT_OFFSET, DEFAULT_LIMIT, default)).ToList();
 
             // Assert
             Assert.Equal(expected.Count, result.Count);
@@ -106,19 +109,19 @@ namespace Schedule_App.Tests.Tests
 
             var searchedTitle = "Title 2";
 
-            var expected = _mapper.Map<GroupReadDTO>(groups.Find(g => g.Title == searchedTitle));
+            var expected = _mapper.Map<GroupReadSummaryDTO>(groups.Find(g => g.Title == searchedTitle));
 
             var context = new Mock<DbContext>();
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroupsByFilter(new GroupFilter()
+            var result = await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 Title = searchedTitle
-            });
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default);
 
             // Assert
             Assert.Equal(expected, result.ElementAt(0), new GroupComparer());
@@ -136,13 +139,13 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.GetGroupsByFilter(new GroupFilter()
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 Title = searchedTitle
-            }));
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default));
         }
 
         [Fact]
@@ -159,13 +162,13 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroupsByFilter(new GroupFilter()
+            var result = await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TeacherId = teacherId
-            });
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default);
 
             // Assert
             Assert.Equal(expectedCount, result.Count());
@@ -189,13 +192,13 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroupsByFilter(new GroupFilter()
+            var result = await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TeacherId = teacherId
-            });
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default);
 
             // Assert
             Assert.Equal(expectedCount, result.Count());
@@ -213,13 +216,13 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await service.GetGroupsByFilter(new GroupFilter()
+            await Assert.ThrowsAsync<ArgumentException>(async () => await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TeacherId = teacherId
-            }));
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default));
         }
 
         [Fact]
@@ -236,13 +239,13 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await service.GetGroupsByFilter(new GroupFilter()
+            await Assert.ThrowsAsync<ArgumentException>(async () => await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TeacherId = teacherId
-            }));
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default));
         }
 
         [Fact]
@@ -260,14 +263,14 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroupsByFilter(new GroupFilter()
+            var result = await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TeacherId = teacherId,
                 TitlePattern = titlePattern
-            });
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default);
 
             // Assert
             Assert.Equal(expectedCount, result.Count());
@@ -286,14 +289,14 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<GroupTeacher>())
                 .ReturnsDbSet(groupTeacherInfos);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroupsByFilter(new GroupFilter()
+            var result = await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TeacherId = teacherId,
                 TitlePattern = titlePattern
-            });
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default);
 
             // Assert
             Assert.Empty(result);
@@ -313,13 +316,13 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroupsByFilter(new GroupFilter()
+            var result = await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TitlePattern = titlePattern,
-            });
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default);
 
             // Assert
             Assert.Equal(expectedCount, result.Count());
@@ -337,13 +340,13 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroupsByFilter(new GroupFilter()
+            var result = await service.GetGroupsSummariesByFilter(new GroupFilter()
             {
                 TitlePattern = titlePattern,
-            });
+            }, DEFAULT_OFFSET, DEFAULT_LIMIT, default);
 
             // Assert
             Assert.Empty(result);
@@ -361,13 +364,13 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
-            var result = await service.GetGroupById(groupId);
+            var result = await service.GetGroupSummaryById(groupId);
 
             // Assert
-            Assert.Equal(_mapper.Map<GroupReadDTO>(groups[0]), result, new GroupComparer());
+            Assert.Equal(_mapper.Map<GroupReadSummaryDTO>(groups[0]), result, new GroupComparer());
         }
 
         [Fact]
@@ -382,10 +385,10 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.GetGroupById(groupId));
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.GetGroupSummaryById(groupId));
         }
 
         [Fact]
@@ -403,7 +406,7 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act / Assert
             await Assert.ThrowsAsync<ArgumentException>(async () => await service.AddGroup(createDTO));
@@ -421,10 +424,10 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.UpdateGroupTitle(id, string.Empty, default));
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.UpdateGroup(id, new GroupUpdateDTO() { Title = string.Empty }, default));
         }
 
         [Fact]
@@ -440,10 +443,10 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act / Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await service.UpdateGroupTitle(id, title, default));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await service.UpdateGroup(id, new GroupUpdateDTO() { Title = title }, default));
         }
 
         [Fact]
@@ -458,7 +461,7 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act / Assert
             await Assert.ThrowsAsync<KeyNotFoundException>(async () => await service.DeleteGroup(id));
@@ -476,7 +479,7 @@ namespace Schedule_App.Tests.Tests
             context.Setup(ctx => ctx.Set<Group>())
                 .ReturnsDbSet(groups);
 
-            var service = new GroupService(new MockRepository(context.Object), _mapper);
+            var service = GetGroupService(context.Object);
 
             // Act
             await service.DeleteGroup(id);
@@ -489,7 +492,7 @@ namespace Schedule_App.Tests.Tests
         {
             var result = new List<Group>();
 
-            for (short i = 1; i <= size; ++i)
+            for (int i = 1; i <= size; ++i)
             {
                 result.Add(new Group()
                 {
@@ -505,7 +508,7 @@ namespace Schedule_App.Tests.Tests
         {
             var result = new List<Teacher>();
 
-            for (short i = 1; i <= size; ++i)
+            for (int i = 1; i <= size; ++i)
             {
                 result.Add(new Teacher()
                 {
@@ -541,6 +544,13 @@ namespace Schedule_App.Tests.Tests
             }
 
             return result;
+        }
+
+        private GroupService GetGroupService(DbContext context)
+        {
+            var repository = new MockRepository(context);
+
+            return new GroupService(repository, _mapper, GetDataHelper(repository));
         }
     }
 }

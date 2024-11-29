@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Schedule_App.Tests.Comparers
 {
-    internal class GroupComparer : IEqualityComparer<GroupReadDTO>
+    internal class GroupComparer : IEqualityComparer<GroupReadSummaryDTO>
     {
-        public bool Equals(GroupReadDTO? x, GroupReadDTO? y)
+        public bool Equals(GroupReadSummaryDTO? x, GroupReadSummaryDTO? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -23,7 +23,7 @@ namespace Schedule_App.Tests.Comparers
                 && x.Title == y.Title;
         }
 
-        public int GetHashCode([DisallowNull] GroupReadDTO obj)
+        public int GetHashCode([DisallowNull] GroupReadSummaryDTO obj)
         {
             return HashCode.Combine(obj.Id, obj.Title);
         }
