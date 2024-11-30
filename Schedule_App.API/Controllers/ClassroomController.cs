@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Schedule_App.API.Services;
 using Schedule_App.Core.DTOs.Classroom;
 using Schedule_App.Core.DTOs.Subject;
 using Schedule_App.Core.Filters;
 using Schedule_App.Core.Interfaces.Services;
+using Schedule_App.Core.Models;
 
 namespace Schedule_App.API.Controllers
 {
@@ -16,35 +18,17 @@ namespace Schedule_App.API.Controllers
         private const string BASE_ENDPOINT = "api/classrooms";
 
         private readonly IClassroomService _classroomService;
+        private readonly IMapper _mapper;
 
-        public ClassroomController(IClassroomService classroomService)
+        public ClassroomController(IClassroomService classroomService, IMapper mapper)
         {
             _classroomService = classroomService;
+            _mapper = mapper;
         }
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ClassroomReadSummaryDTO>>> GetClassrooms(
-            [FromQuery] int offset = 0,
-            [FromQuery] int limit = 20,
-            [FromQuery] bool includeAuditInfo = false,
-            CancellationToken cancellationToken = default)
-        {
-            IEnumerable<ClassroomReadSummaryDTO> classrooms;
-
-            if (includeAuditInfo)
-            {
-                classrooms = await _classroomService.GetClassroomsDetailed(offset, limit, cancellationToken);
-            }
-            else
-            {
-                classrooms = await _classroomService.GetClassroomsSummaries(offset, limit, cancellationToken);
-            }
-
-            return Ok(classrooms);
-        }
-
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<ClassroomReadSummaryDTO>>> GetClassroomsByFilter(
             [FromQuery] string? title = null,
             [FromQuery] int offset = 0,
             [FromQuery] int limit = 20,
@@ -56,19 +40,18 @@ namespace Schedule_App.API.Controllers
                 Title = title,
             };
 
-            IEnumerable<ClassroomReadSummaryDTO> classrooms;
+            Classroom[] classrooms = await _classroomService.GetClassrooms(classroomFilter, offset, limit, cancellationToken);
+
+            IEnumerable<ClassroomReadSummaryDTO> result;
 
             if (includeAuditInfo)
-            {
-                classrooms = await _classroomService.GetClassroomsDetailedByFilter(classroomFilter, offset, limit, cancellationToken);
-            }
+                result = _mapper.Map<IEnumerable<ClassroomReadFullDTO>>(classrooms);
             else
-            {
-                classrooms = await _classroomService.GetClassroomsSummariesByFilter(classroomFilter, offset, limit, cancellationToken);
-            }
+                result = _mapper.Map<IEnumerable<ClassroomReadSummaryDTO>>(classrooms);
 
-            return Ok(classrooms);
+            return Ok(result);
         }
+
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ClassroomReadSummaryDTO>> GetClassroomById(
@@ -76,26 +59,28 @@ namespace Schedule_App.API.Controllers
             [FromQuery] bool includeAuditInfo = false, 
             CancellationToken cancellationToken = default)
         {
-            ClassroomReadSummaryDTO classroom;
+            Classroom classroom = await _classroomService.GetClassroomById(id, cancellationToken);
+
+            ClassroomReadSummaryDTO result;
 
             if (includeAuditInfo)
-            {
-                classroom = await _classroomService.GetClassroomDetailedById(id, cancellationToken);
-            }
+                result = _mapper.Map<ClassroomReadFullDTO>(classroom);
             else
-            {
-                classroom = await _classroomService.GetClassroomSummaryById(id, cancellationToken);
-            }
+                result = _mapper.Map<ClassroomReadSummaryDTO>(classroom);
 
-            return Ok(classroom);
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<ActionResult<ClassroomReadSummaryDTO>> AddClassroom([FromBody] ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken)
         {
-            var classroom = await _classroomService.AddClassroom(classroomCreateDTO, cancellationToken);
+            var classroom = _mapper.Map<Classroom>(classroomCreateDTO);
 
-            return Created($"{BASE_ENDPOINT}/{classroom.Id}", classroom);
+            Classroom createdClassroom = await _classroomService.AddClassroom(classroom, cancellationToken);
+
+            var result = _mapper.Map<ClassroomReadSummaryDTO>(createdClassroom);
+
+            return Created($"{BASE_ENDPOINT}/{result.Id}", result);
         }
 
         [HttpDelete("{id:int}")]

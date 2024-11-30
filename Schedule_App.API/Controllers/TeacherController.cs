@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Schedule_App.Core.DTOs.Teacher;
 using Schedule_App.Core.Filters;
 using Schedule_App.Core.Interfaces.Services;
+using Schedule_App.Core.Models;
 
 namespace Schedule_App.API.Controllers
 {
@@ -15,36 +17,17 @@ namespace Schedule_App.API.Controllers
 
         private readonly ITeacherService _teacherService;
         private readonly ITeacherSubjectService _teacherSubjectService;
+        private readonly IMapper _mapper;
 
-        public TeacherController(ITeacherService teacherService, ITeacherSubjectService teacherSubjectService)
+        public TeacherController(ITeacherService teacherService, ITeacherSubjectService teacherSubjectService, IMapper mapper)
         {
             _teacherService = teacherService;
             _teacherSubjectService = teacherSubjectService;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TeacherReadSummaryDTO>>> GetTeachers(
-            [FromQuery] int offset = 0, 
-            [FromQuery] int limit = 20,
-            [FromQuery] bool includeAuditInfo = false,
-            CancellationToken cancellationToken = default)
-        {
-            IEnumerable<TeacherReadSummaryDTO> teachers;
-
-            if (includeAuditInfo)
-            {
-                teachers = await _teacherService.GetTeachersDetailed(offset, limit, cancellationToken);
-            }
-            else
-            {
-                teachers = await _teacherService.GetTeachersSummaries(offset, limit, cancellationToken);
-            }
-
-            return Ok(teachers);
-        }
-
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<TeacherReadSummaryDTO>>> GetTeachersByFilter(
             [FromQuery] string? username = null,
             [FromQuery] int? groupId = null,
             [FromQuery] int? subjectId = null,
@@ -60,18 +43,16 @@ namespace Schedule_App.API.Controllers
                 SubjectId = subjectId,
             };
 
-            IEnumerable<TeacherReadSummaryDTO> teachers;
+            Teacher[] teachers = await _teacherService.GetTeachers(teacherFilter, offset, limit, cancellationToken);
+
+            IEnumerable<TeacherReadSummaryDTO> result;
 
             if (includeAuditInfo)
-            {
-                teachers = await _teacherService.GetTeachersDetailedByFilter(teacherFilter, offset, limit, cancellationToken);
-            }
+                result = _mapper.Map<IEnumerable<TeacherReadFullDTO>>(teachers);
             else
-            {
-                teachers = await _teacherService.GetTeachersSummariesByFilter(teacherFilter, offset, limit, cancellationToken);
-            }
+                result = _mapper.Map<IEnumerable<TeacherReadSummaryDTO>>(teachers);
 
-            return Ok(teachers);
+            return Ok(result);
         }
 
         [HttpGet("{id:int}")]
@@ -80,26 +61,28 @@ namespace Schedule_App.API.Controllers
             [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
-            TeacherReadSummaryDTO teacher;
+            Teacher teacher = await _teacherService.GetTeacherById(id, cancellationToken);
+
+            TeacherReadSummaryDTO result;
 
             if (includeAuditInfo)
-            {
-                teacher = await _teacherService.GetTeacherDetailedById(id, cancellationToken);
-            }
+                result = _mapper.Map<TeacherReadFullDTO>(teacher);
             else
-            {
-                teacher = await _teacherService.GetTeacherSummaryById(id, cancellationToken);
-            }
+                result = _mapper.Map<TeacherReadSummaryDTO>(teacher);
 
-            return Ok(teacher);
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<ActionResult<TeacherReadSummaryDTO>> AddTeacher([FromBody] TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken)
         {
-            var teacher = await _teacherService.AddTeacher(teacherCreateDTO, cancellationToken);
+            var teacher = _mapper.Map<Teacher>(teacherCreateDTO);
 
-            return Created($"{BASE_ENDPOINT}/{teacher.Id}", teacher);
+            Teacher createdTeacher = await _teacherService.AddTeacher(teacher, cancellationToken);
+
+            var result = _mapper.Map<TeacherReadSummaryDTO>(teacher);
+
+            return Created($"{BASE_ENDPOINT}/{result.Id}", result);
         }
 
         [HttpPost("{teacherId:int}/subject/{subjectId:int}")]
@@ -119,9 +102,11 @@ namespace Schedule_App.API.Controllers
             [FromBody] TeacherUpdateDTO teacherUpdateDTO, 
             CancellationToken cancellationToken)
         {
-            var teacher = await _teacherService.UpdateTeacher(id, teacherUpdateDTO, cancellationToken);
+            Teacher teacher = await _teacherService.UpdateTeacher(id, teacherUpdateDTO, cancellationToken);
 
-            return Ok(teacher);
+            var result = _mapper.Map<TeacherReadSummaryDTO>(teacher);
+
+            return Ok(result);
         }
 
         [HttpDelete("{id:int}")]

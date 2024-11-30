@@ -15,99 +15,91 @@ namespace Schedule_App.API.Services
     public class GroupTeacherService : IGroupTeacherService
     {
         private readonly IRepository _repository;
-        private readonly IMapper _mapper;
         private readonly IDataHelper _dataHelper;
 
-        public GroupTeacherService(IRepository repository, IMapper mapper, IDataHelper dataHelper)
+        public GroupTeacherService(IRepository repository, IDataHelper dataHelper)
         {
             _repository = repository;
-            _mapper = mapper;
             _dataHelper = dataHelper;
         }
 
         #region Read
-        public async Task<IEnumerable<GroupTeacherReadDTO>> GetGroupTeacherAssociations(int offset, int limit, CancellationToken cancellationToken)
+        public Task<GroupTeacher[]> GetGroupTeacherAssociations(int offset, int limit, CancellationToken cancellationToken)
         {
-            var result = await GetActualGroupTeacherAssociations()
+            return GetActualGroupTeacherAssociations()
                 .AsNoTracking()
                 .Skip(offset)
                 .Take(limit)
                 .ToArrayAsync(cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupTeacherReadDTO>>(result);
         }
 
 
-        public async Task<GroupTeacherReadDTO> GetGroupTeacherAssociation(int groupId, int teacherId, CancellationToken cancellationToken)
+        public async Task<GroupTeacher> GetGroupTeacherAssociation(int groupId, int teacherId, CancellationToken cancellationToken)
         {
-            var result = await GetActualGroupTeacherAssociations()
+            var groupTeacher = await GetActualGroupTeacherAssociations()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(gt => gt.GroupId == groupId && gt.TeacherId == teacherId, cancellationToken);
 
-            return _mapper.Map<GroupTeacherReadDTO>(result);
+            // Checks if GroupTeacherAssociation exists
+            EntityValidator.EnsureEntityExists(
+                entity: groupTeacher,
+                propertyNames: [ nameof(groupTeacher.GroupId), nameof(groupTeacher.TeacherId) ],
+                propertyValues: [ groupId, teacherId ]);
+
+            return groupTeacher!;
         }
 
 
-        public async Task<IEnumerable<GroupTeacherReadDTO>> GetGroupsByTeacherId(int teacherId, int offset, int limit, CancellationToken cancellationToken)
+        public Task<GroupTeacher[]> GetGroupsByTeacherId(int teacherId, int offset, int limit, CancellationToken cancellationToken)
         {
-            var result = await GetActualGroupTeacherAssociations()
+            return GetActualGroupTeacherAssociations()
                 .AsNoTracking()
                 .Where(gt => gt.TeacherId == teacherId)
-                .Select(gt => new GroupTeacherReadDTO()
+                .Select(gt => new GroupTeacher()
                 {
-                    Group = _mapper.Map<GroupReadSummaryDTO>(gt.Group),
+                    Group = gt.Group,
                     CreatedAt = gt.CreatedAt,
                     UpdatedAt = gt.UpdatedAt,
                 })
                 .Skip(offset)
                 .Take(limit)
                 .ToArrayAsync(cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupTeacherReadDTO>>(result);
         }
 
 
-        public async Task<IEnumerable<GroupTeacherReadDTO>> GetTeachersByGroupId(int groupId, int offset, int limit, CancellationToken cancellationToken)
+        public Task<GroupTeacher[]> GetTeachersByGroupId(int groupId, int offset, int limit, CancellationToken cancellationToken)
         {
-            var result = await GetActualGroupTeacherAssociations()
+            return GetActualGroupTeacherAssociations()
                 .AsNoTracking()
                 .Where(gt => gt.GroupId == groupId)
-                .Select(gt => new GroupTeacherReadDTO()
+                .Select(gt => new GroupTeacher()
                 {
-                    Teacher = _mapper.Map<TeacherReadSummaryDTO>(gt.Teacher),
+                    Teacher = gt.Teacher,
                     CreatedAt = gt.CreatedAt,
                     UpdatedAt = gt.UpdatedAt,
                 })
                 .Skip(offset)
                 .Take(limit)
                 .ToArrayAsync(cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupTeacherReadDTO>>(result);
         }
         #endregion
 
         #region Create
-        public async Task AddTeacherToGroup(GroupTeacherCreateDTO createDTO, CancellationToken cancellationToken)
+        public async Task AddTeacherToGroup(GroupTeacher groupTeacher, CancellationToken cancellationToken)
         {
-            await ValidateCreateDTO(createDTO, cancellationToken);
-
-            var groupTeacher = new GroupTeacher()
-            {
-                GroupId = createDTO.GroupId,
-                TeacherId = createDTO.TeacherId,
-            };
+            await ValidateGroupTeacher(groupTeacher, cancellationToken);
 
             await _repository.AddAuditableEntity(groupTeacher, cancellationToken);
 
-            await UpdateTimestampsByTeacherAndGroup(createDTO.TeacherId, createDTO.GroupId, cancellationToken);
+            await UpdateTimestampsByTeacherAndGroup(groupTeacher.TeacherId, groupTeacher.GroupId, cancellationToken);
 
             await _repository.SaveChanges(cancellationToken);
         }
 
-        private async Task ValidateCreateDTO(GroupTeacherCreateDTO createDTO, CancellationToken cancellationToken)
+        private async Task ValidateGroupTeacher(GroupTeacher groupTeacher, CancellationToken cancellationToken)
         {
-            var groupId = createDTO.GroupId;
-            var teacherId = createDTO.TeacherId;
+            var groupId = groupTeacher.GroupId;
+            var teacherId = groupTeacher.TeacherId;
 
             // Checks if this (not deleted) association does not exist yet
             var alreadyExists = await _repository.GetAllNotDeleted<GroupTeacher>()
@@ -139,12 +131,10 @@ namespace Schedule_App.API.Services
         #region Delete
         public async Task RemoveTeacherFromGroup(int groupId, int teacherId, CancellationToken cancellationToken)
         {
-            var groupTeacher = await _repository.GetAllNotDeleted<GroupTeacher>()
-                .Include(gt => gt.Group)
-                .Include(gt => gt.Teacher)
+            var groupTeacher = await GetActualGroupTeacherAssociations()
                 .FirstOrDefaultAsync(gt => gt.GroupId == groupId && gt.TeacherId == teacherId, cancellationToken);
 
-            // Checks if TeacherGroup exists
+            // Checks if GroupTeacherAssociation exists
             EntityValidator.EnsureEntityExists(
                 entity: groupTeacher,
                 propertyNames: [nameof(groupTeacher.GroupId), nameof(groupTeacher.TeacherId)],

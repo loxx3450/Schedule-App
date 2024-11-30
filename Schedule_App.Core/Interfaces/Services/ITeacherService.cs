@@ -1,5 +1,6 @@
 ﻿using Schedule_App.Core.DTOs.Teacher;
 using Schedule_App.Core.Filters;
+using Schedule_App.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +11,13 @@ namespace Schedule_App.Core.Interfaces.Services
 {
     public interface ITeacherService
     {
-        Task<IEnumerable<TeacherReadSummaryDTO>> GetTeachersSummaries(int offset, int limit, CancellationToken cancellationToken);
-        Task<IEnumerable<TeacherReadFullDTO>> GetTeachersDetailed(int offset, int limit, CancellationToken cancellationToken);
+        Task<Teacher[]> GetTeachers(TeacherFilter filter, int offset, int limit, CancellationToken cancellationToken);
 
-        Task<IEnumerable<TeacherReadSummaryDTO>> GetTeachersSummariesByFilter(TeacherFilter filter, int offset, int limit, CancellationToken cancellationToken);
-        Task<IEnumerable<TeacherReadFullDTO>> GetTeachersDetailedByFilter(TeacherFilter filter, int offset, int limit, CancellationToken cancellationToken);
+        Task<Teacher> GetTeacherById(int id, CancellationToken cancellationToken);
 
-        Task<TeacherReadSummaryDTO> GetTeacherSummaryById(int id, CancellationToken cancellationToken);
-        Task<TeacherReadFullDTO> GetTeacherDetailedById(int id, CancellationToken cancellationToken);
+        Task<Teacher> AddTeacher(Teacher teacher, CancellationToken cancellationToken);
 
-        Task<TeacherReadSummaryDTO> AddTeacher(TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken);
-
-        Task<TeacherReadSummaryDTO> UpdateTeacher(int id, TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken);
+        Task<Teacher> UpdateTeacher(int id, TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken);
 
         Task DeleteTeacher(int id, CancellationToken cancellationToken);
     }

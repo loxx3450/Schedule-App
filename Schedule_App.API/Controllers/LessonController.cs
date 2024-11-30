@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Schedule_App.API.Services;
 using Schedule_App.Core.DTOs.Lesson;
@@ -17,35 +18,16 @@ namespace Schedule_App.API.Controllers
         private const string BASE_ENDPOINT = "lessons";
 
         private readonly ILessonService _lessonService;
+        private readonly IMapper _mapper;
 
-        public LessonController(ILessonService lessonService)
+        public LessonController(ILessonService lessonService, IMapper mapper)
         {
             _lessonService = lessonService;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<LessonReadSummaryDTO>>> GetTeachers(
-            [FromQuery] int offset = 0,
-            [FromQuery] int limit = 20,
-            [FromQuery] bool includeAuditInfo = false,
-            CancellationToken cancellationToken = default)
-        {
-            IEnumerable<LessonReadSummaryDTO> lessons;
-
-            if (includeAuditInfo)
-            {
-                lessons = await _lessonService.GetLessonsDetailed(offset, limit, cancellationToken);
-            }
-            else
-            {
-                lessons = await _lessonService.GetLessonsSummaries(offset, limit, cancellationToken);
-            }
-
-            return Ok(lessons);
-        }
-
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<LessonReadSummaryDTO>>> GetTeachersByFilter(
+        public async Task<ActionResult<IEnumerable<LessonReadSummaryDTO>>> GetLessons(
             [FromQuery] int? classroomId = null,
             [FromQuery] int? subjectId = null,
             [FromQuery] int? groupId = null,
@@ -67,18 +49,16 @@ namespace Schedule_App.API.Controllers
                 StatusId = statusId,
             };
 
-            IEnumerable<LessonReadSummaryDTO> lessons;
+            Lesson[] lessons = await _lessonService.GetLessons(lessonFilter, offset, limit, cancellationToken);
+
+            IEnumerable<LessonReadSummaryDTO> result;
 
             if (includeAuditInfo)
-            {
-                lessons = await _lessonService.GetLessonsDetailedByFilter(lessonFilter, offset, limit, cancellationToken);
-            }
+                result = _mapper.Map<IEnumerable<LessonReadFullDTO>>(lessons);
             else
-            {
-                lessons = await _lessonService.GetLessonsSummariesByFilter(lessonFilter, offset, limit, cancellationToken);
-            }
+                result = _mapper.Map<IEnumerable<LessonReadSummaryDTO>>(lessons);
 
-            return Ok(lessons);
+            return Ok(result);
         }
 
         [HttpGet("{id:int}")]
@@ -87,26 +67,28 @@ namespace Schedule_App.API.Controllers
             [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
-            LessonReadSummaryDTO lesson;
+            Lesson lesson = await _lessonService.GetLessonById(id, cancellationToken);
+
+            LessonReadSummaryDTO result;
 
             if (includeAuditInfo)
-            {
-                lesson = await _lessonService.GetLessonDetailedById(id, cancellationToken);
-            }   
+                result = _mapper.Map<LessonReadFullDTO>(lesson);
             else
-            {
-                lesson = await _lessonService.GetLessonSummaryById(id, cancellationToken);
-            }
+                result = _mapper.Map<LessonReadSummaryDTO>(lesson);
 
-            return Ok(lesson);
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<ActionResult<LessonReadSummaryDTO>> AddLesson([FromBody] LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken)
         {
-            var lesson = await _lessonService.AddLesson(lessonCreateDTO, cancellationToken);
+            var lesson = _mapper.Map<Lesson>(lessonCreateDTO);
 
-            return Created($"{BASE_ENDPOINT}/{lesson.Id}", lesson);
+            Lesson createdLesson = await _lessonService.AddLesson(lesson, cancellationToken);
+
+            var result = _mapper.Map<LessonReadSummaryDTO>(createdLesson);
+
+            return Created($"{BASE_ENDPOINT}/{result.Id}", result);
         }
 
         [HttpPatch("{id:int}")]
@@ -115,9 +97,11 @@ namespace Schedule_App.API.Controllers
             [FromBody] LessonUpdateDTO lessonUpdateDTO, 
             CancellationToken cancellationToken)
         {
-            var lesson = await _lessonService.UpdateLesson(id, lessonUpdateDTO, cancellationToken);
+            Lesson lesson = await _lessonService.UpdateLesson(id, lessonUpdateDTO, cancellationToken);
 
-            return Ok(lesson);
+            var result = _mapper.Map<LessonReadSummaryDTO>(lesson);
+
+            return Ok(result);
         }
 
         [HttpDelete("{id:int}")]

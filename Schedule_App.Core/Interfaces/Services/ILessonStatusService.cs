@@ -10,8 +10,8 @@ namespace Schedule_App.Core.Interfaces.Services
 {
     public interface ILessonStatusService
     {
-        Task<IEnumerable<LessonStatusReadDTO>> GetLessonStatuses(CancellationToken cancellationToken);
+        Task<LessonStatus[]> GetLessonStatuses(CancellationToken cancellationToken);
 
-        Task<LessonStatusReadDTO> GetLessonStatusById(int id, CancellationToken cancellationToken);
+        Task<LessonStatus> GetLessonStatusById(int id, CancellationToken cancellationToken);
     }
 }

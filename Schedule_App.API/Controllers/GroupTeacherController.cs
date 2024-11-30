@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Schedule_App.Core.DTOs.GroupTeacher;
 using Schedule_App.Core.Interfaces.Services;
+using Schedule_App.Core.Models;
 
 namespace Schedule_App.API.Controllers
 {
@@ -13,10 +15,12 @@ namespace Schedule_App.API.Controllers
         private const string BASE_ENDPOINT = "api/groups_teachers";
 
         private readonly IGroupTeacherService _groupTeacherService;
+        private readonly IMapper _mapper;
 
-        public GroupTeacherController(IGroupTeacherService groupTeacherService)
+        public GroupTeacherController(IGroupTeacherService groupTeacherService, IMapper mapper)
         {
             _groupTeacherService = groupTeacherService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -27,7 +31,7 @@ namespace Schedule_App.API.Controllers
             [FromQuery] int limit = 20,
             CancellationToken cancellationToken = default)
         {
-            IEnumerable<GroupTeacherReadDTO> associations;
+            IEnumerable<GroupTeacher> associations;
 
             if (groupId.HasValue && teacherId.HasValue)
             {
@@ -50,7 +54,9 @@ namespace Schedule_App.API.Controllers
                 associations = await _groupTeacherService.GetGroupTeacherAssociations(offset, limit, cancellationToken);
             }
 
-            return Ok(associations);
+            var result = _mapper.Map<IEnumerable<GroupTeacherReadDTO>>(associations);
+
+            return Ok(result);
         }
 
         [HttpPost]
@@ -58,7 +64,9 @@ namespace Schedule_App.API.Controllers
             [FromBody] GroupTeacherCreateDTO createDTO, 
             CancellationToken cancellationToken)
         {
-            await _groupTeacherService.AddTeacherToGroup(createDTO, cancellationToken);
+            var groupTeacher = _mapper.Map<GroupTeacher>(createDTO);
+
+            await _groupTeacherService.AddTeacherToGroup(groupTeacher, cancellationToken);
 
             return NoContent();
         }

@@ -14,57 +14,16 @@ namespace Schedule_App.API.Services
     public class GroupService : IGroupService
     {
         private readonly IRepository _repository;
-        private readonly IMapper _mapper;
         private readonly IDataHelper _dataHelper;
 
-        public GroupService(IRepository repository, IMapper mapper, IDataHelper dataHelper)
+        public GroupService(IRepository repository, IDataHelper dataHelper)
         {
             _repository = repository;
-            _mapper = mapper;
             _dataHelper = dataHelper;
         }
 
         #region Read
-        public async Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummaries(int offset, int limit, CancellationToken cancellationToken)
-        {
-            var groups = await GetGroups(offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupReadSummaryDTO>>(groups);
-        }
-
-        public async Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetailed(int offset, int limit, CancellationToken cancellationToken)
-        {
-            var groups = await GetGroups(offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupReadFullDTO>>(groups);
-        }
-
-        private async Task<IEnumerable<Group>> GetGroups(int offset, int limit, CancellationToken cancellationToken)
-        {
-            return await _repository.GetAllNotDeleted<Group>()
-                .AsNoTracking()
-                .Skip(offset)
-                .Take(limit)
-                .ToArrayAsync(cancellationToken);
-        }
-
-
-
-        public async Task<IEnumerable<GroupReadSummaryDTO>> GetGroupsSummariesByFilter(GroupFilter groupFilter, int offset, int limit, CancellationToken cancellationToken)
-        {
-            var groups = await GetGroupsByFilter(groupFilter, offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupReadSummaryDTO>>(groups);
-        }
-
-        public async Task<IEnumerable<GroupReadFullDTO>> GetGroupsDetailedByFilter(GroupFilter groupFilter, int offset, int limit, CancellationToken cancellationToken)
-        {
-            var groups = await GetGroupsByFilter(groupFilter, offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<GroupReadFullDTO>>(groups);
-        }
-
-        private async Task<IEnumerable<Group>> GetGroupsByFilter(GroupFilter groupFilter, int offset, int limit, CancellationToken cancellationToken)
+        public async Task<Group[]> GetGroups(GroupFilter groupFilter, int offset, int limit, CancellationToken cancellationToken)
         {
             if (groupFilter.Title is not null)
             {
@@ -117,22 +76,7 @@ namespace Schedule_App.API.Services
         }
 
 
-
-        public async Task<GroupReadSummaryDTO> GetGroupSummaryById(int id, CancellationToken cancellationToken = default)
-        {
-            var group = await GetGroupById(id, cancellationToken);
-
-            return _mapper.Map<GroupReadSummaryDTO>(group);
-        }
-
-        public async Task<GroupReadFullDTO> GetGroupDetailedById(int id, CancellationToken cancellationToken = default)
-        {
-            var group = await GetGroupById(id, cancellationToken);
-
-            return _mapper.Map<GroupReadFullDTO>(group);
-        }
-
-        private async Task<Group> GetGroupById(int id, CancellationToken cancellationToken)
+        public async Task<Group> GetGroupById(int id, CancellationToken cancellationToken)
         {
             var group = await _dataHelper.GetAuditableEntityByIdAsNoTracking<Group>(id, cancellationToken);
 
@@ -144,32 +88,33 @@ namespace Schedule_App.API.Services
         #endregion
 
         #region Create
-        public async Task<GroupReadSummaryDTO> AddGroup(GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken = default)
+        public async Task<Group> AddGroup(Group group, CancellationToken cancellationToken = default)
         {
-            var group = _mapper.Map<Group>(groupCreateDTO);
-
-            await EnsureTitleIsNotTaken(groupCreateDTO.Title, cancellationToken);
+            await EnsureTitleIsNotTaken(group.Title, cancellationToken);
 
             await _repository.AddAuditableEntity<Group>(group, cancellationToken);
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<GroupReadSummaryDTO>(group);
+            return group;
         }
         #endregion
 
         #region Update
-        public async Task<GroupReadSummaryDTO> UpdateGroup(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken)
+        public async Task<Group> UpdateGroup(int id, GroupUpdateDTO groupUpdateDTO, CancellationToken cancellationToken)
         {
-            var group = await GetGroupById(id, cancellationToken);
+            var group = await _dataHelper.GetAuditableEntityById<Group>(id, cancellationToken);
+
+            // Check if Group exists
+            EntityValidator.EnsureEntityExists(group, nameof(group.Id), id);
 
             await EnsureTitleIsNotTaken(groupUpdateDTO.Title, cancellationToken);
 
-            group.Title = groupUpdateDTO.Title;
-            group.UpdatedAt = DateTime.UtcNow;
+            group!.Title = groupUpdateDTO.Title;
+            group!.UpdatedAt = DateTime.UtcNow;
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<GroupReadSummaryDTO>(group);
+            return group!;
         }
         #endregion
 

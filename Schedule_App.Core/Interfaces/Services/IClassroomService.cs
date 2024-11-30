@@ -1,5 +1,6 @@
 ﻿using Schedule_App.Core.DTOs.Classroom;
 using Schedule_App.Core.Filters;
+using Schedule_App.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,16 +11,11 @@ namespace Schedule_App.Core.Interfaces.Services
 {
     public interface IClassroomService
     {
-        Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummaries(int offset, int limit, CancellationToken cancellationToken);
-        Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailed(int offset, int limit, CancellationToken cancellationToken);
+        Task<Classroom[]> GetClassrooms(ClassroomFilter filter, int offset, int limit, CancellationToken cancellationToken);
 
-        Task<IEnumerable<ClassroomReadSummaryDTO>> GetClassroomsSummariesByFilter(ClassroomFilter filter, int offset, int limit, CancellationToken cancellationToken);
-        Task<IEnumerable<ClassroomReadFullDTO>> GetClassroomsDetailedByFilter(ClassroomFilter filter, int offset, int limit, CancellationToken cancellationToken);
+        Task<Classroom> GetClassroomById(int id, CancellationToken cancellationToken);
 
-        Task<ClassroomReadSummaryDTO> GetClassroomSummaryById(int id, CancellationToken cancellationToken);
-        Task<ClassroomReadFullDTO> GetClassroomDetailedById(int id, CancellationToken cancellationToken);
-
-        Task<ClassroomReadSummaryDTO> AddClassroom(ClassroomCreateDTO classroomCreateDTO, CancellationToken cancellationToken);
+        Task<Classroom> AddClassroom(Classroom classroomCreateDTO, CancellationToken cancellationToken);
 
         Task DeleteClassroom(int id, CancellationToken cancellationToken);
     }

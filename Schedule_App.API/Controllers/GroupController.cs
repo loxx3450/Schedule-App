@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Schedule_App.Core.DTOs.Group;
 using Schedule_App.Core.DTOs.GroupTeacher;
 using Schedule_App.Core.Filters;
 using Schedule_App.Core.Interfaces.Services;
 using Schedule_App.Core.Models;
+using System.Collections.Generic;
 
 namespace Schedule_App.API.Controllers
 {
@@ -16,37 +18,17 @@ namespace Schedule_App.API.Controllers
         private const string BASE_ENDPOINT = "api/groups";
 
         private readonly IGroupService _groupService;
+        private readonly IMapper _mapper;
 
-        public GroupController(IGroupService groupService)
+        public GroupController(IGroupService groupService, IMapper mapper)
         {
             _groupService = groupService;
+            _mapper = mapper;
         }
 
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GroupReadSummaryDTO>>> GetGroups(
-            [FromQuery] int offset = 0, 
-            [FromQuery] int limit = 20,
-            [FromQuery] bool includeAuditInfo = false,
-            CancellationToken cancellationToken = default)
-        {
-            IEnumerable<GroupReadSummaryDTO> groups;
-
-            if (includeAuditInfo)
-            {
-                groups = await _groupService.GetGroupsDetailed(offset, limit, cancellationToken);
-            }
-            else
-            {
-                groups = await _groupService.GetGroupsSummaries(offset, limit, cancellationToken);
-            }
-
-            return Ok(groups);
-        }
-
-
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<GroupReadSummaryDTO>>> GetGroupsByFilter(
             [FromQuery] string? title = null,
             [FromQuery] string? titlePattern = null,
             [FromQuery] int? teacherId = null,
@@ -62,18 +44,16 @@ namespace Schedule_App.API.Controllers
                 TeacherId = teacherId,
             };
 
-            IEnumerable<GroupReadSummaryDTO> groups;
+            Group[] groups = await _groupService.GetGroups(groupFilter, offset, limit, cancellationToken);
+
+            IEnumerable<GroupReadSummaryDTO> result;
 
             if (includeAuditInfo)
-            {
-                groups = await _groupService.GetGroupsDetailedByFilter(groupFilter, offset, limit, cancellationToken);
-            }
+                result = _mapper.Map<IEnumerable<GroupReadFullDTO>>(groups);
             else
-            {
-                groups = await _groupService.GetGroupsSummariesByFilter(groupFilter, offset, limit, cancellationToken);
-            }
+                result = _mapper.Map<IEnumerable<GroupReadSummaryDTO>>(groups);
 
-            return Ok(groups);
+            return Ok(result);
         }
 
 
@@ -83,27 +63,29 @@ namespace Schedule_App.API.Controllers
             [FromQuery] bool includeAuditInfo = false,
             CancellationToken cancellationToken = default)
         {
-            GroupReadSummaryDTO group;
+            Group group = await _groupService.GetGroupById(id, cancellationToken);
+
+            GroupReadSummaryDTO result;
 
             if (includeAuditInfo)
-            {
-                group = await _groupService.GetGroupDetailedById(id, cancellationToken);
-            }
+                result = _mapper.Map<GroupReadFullDTO>(group);
             else
-            {
-                group = await _groupService.GetGroupSummaryById(id, cancellationToken);
-            }
+                result = _mapper.Map<GroupReadSummaryDTO>(group);
 
-            return Ok(group);
+            return Ok(result);
         }
 
 
         [HttpPost]
         public async Task<ActionResult<GroupReadSummaryDTO>> AddGroup([FromBody] GroupCreateDTO groupCreateDTO, CancellationToken cancellationToken)
         {
-            var group = await _groupService.AddGroup(groupCreateDTO, cancellationToken);
+            var group = _mapper.Map<Group>(groupCreateDTO);
 
-            return Created($"{BASE_ENDPOINT}/{group.Id}", group);
+            Group createdGroup = await _groupService.AddGroup(group, cancellationToken);
+
+            var result = _mapper.Map<GroupReadSummaryDTO>(createdGroup);
+
+            return Created($"{BASE_ENDPOINT}/{result.Id}", result);
         }
 
 
@@ -113,9 +95,11 @@ namespace Schedule_App.API.Controllers
             [FromBody] GroupUpdateDTO groupUpdateDTO, 
             CancellationToken cancellationToken)
         {
-            var group = await _groupService.UpdateGroup(id, groupUpdateDTO, cancellationToken);
+            Group group = await _groupService.UpdateGroup(id, groupUpdateDTO, cancellationToken);
 
-            return Ok(group);
+            var result = _mapper.Map<GroupReadSummaryDTO>(group);
+
+            return Ok(result);
         }
 
 

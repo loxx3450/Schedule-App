@@ -11,18 +11,13 @@ namespace Schedule_App.Core.Interfaces.Services
 {
     public interface ISubjectService
     {
-        Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummaries(int offset, int limit, CancellationToken cancellationToken);
-        Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailed(int offset, int limit, CancellationToken cancellationToken);
+        Task<Subject[]> GetSubjects(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken);
 
-        Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummariesByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken);
-        Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailedByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken);
+        Task<Subject> GetSubjectById(int id, CancellationToken cancellationToken);
 
-        Task<SubjectReadSummaryDTO> GetSubjectSummaryById(int id, CancellationToken cancellationToken);
-        Task<SubjectReadFullDTO> GetSubjectDetailedById(int id, CancellationToken cancellationToken);
+        Task<Subject> AddSubject(Subject subject, CancellationToken cancellationToken);
 
-        Task<SubjectReadSummaryDTO> AddSubject(SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken);
-
-        Task<SubjectReadSummaryDTO> UpdateSubject(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken);
+        Task<Subject> UpdateSubject(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken);
 
         Task DeleteSubject(int id, CancellationToken cancellationToken);
     }

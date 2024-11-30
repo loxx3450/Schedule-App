@@ -1,5 +1,6 @@
 ﻿using Schedule_App.Core.DTOs.Lesson;
 using Schedule_App.Core.Filters;
+using Schedule_App.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +11,13 @@ namespace Schedule_App.Core.Interfaces.Services
 {
     public interface ILessonService
     {
-        Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummaries(int offset, int limit, CancellationToken cancellationToken);
-        Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailed(int offset, int limit, CancellationToken cancellationToken);
+        Task<Lesson[]> GetLessons(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken);
 
-        Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummariesByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken);
-        Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailedByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken);
+        Task<Lesson> GetLessonById(int id, CancellationToken cancellationToken);
 
-        Task<LessonReadSummaryDTO> GetLessonSummaryById(int id, CancellationToken cancellationToken);
-        Task<LessonReadFullDTO> GetLessonDetailedById(int id, CancellationToken cancellationToken);
+        Task<Lesson> AddLesson(Lesson lesson, CancellationToken cancellationToken);
 
-        Task<LessonReadSummaryDTO> AddLesson(LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken);
-
-        Task<LessonReadSummaryDTO> UpdateLesson(int id, LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken);
+        Task<Lesson> UpdateLesson(int id, LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken);
 
         Task DeleteLesson(int id, CancellationToken cancellationToken);
     }

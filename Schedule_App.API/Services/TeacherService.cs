@@ -13,57 +13,16 @@ namespace Schedule_App.API.Services
     public class TeacherService : ITeacherService
     {
         private readonly IRepository _repository;
-        private readonly IMapper _mapper;
         private readonly IDataHelper _dataHelper;
 
-        public TeacherService(IRepository repository, IMapper mapper, IDataHelper dataHelper)
+        public TeacherService(IRepository repository, IDataHelper dataHelper)
         {
             _repository = repository;
-            _mapper = mapper;
             _dataHelper = dataHelper;
         }
 
         #region Read
-        public async Task<IEnumerable<TeacherReadSummaryDTO>> GetTeachersSummaries(int offset, int limit, CancellationToken cancellationToken)
-        {
-            var teachers = await GetTeachers(offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<TeacherReadSummaryDTO>>(teachers);
-        }
-
-        public async Task<IEnumerable<TeacherReadFullDTO>> GetTeachersDetailed(int offset, int limit, CancellationToken cancellationToken)
-        {
-            var teachers = await GetTeachers(offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<TeacherReadFullDTO>>(teachers);
-        }
-
-        private Task<Teacher[]> GetTeachers(int offset, int limit, CancellationToken cancellationToken)
-        {
-            return _repository.GetAllNotDeleted<Teacher>()
-                .AsNoTracking()
-                .Skip(offset)
-                .Take(limit)
-                .ToArrayAsync(cancellationToken);
-        }
-        
-
-
-        public async Task<IEnumerable<TeacherReadSummaryDTO>> GetTeachersSummariesByFilter(TeacherFilter filter, int offset, int limit, CancellationToken cancellationToken)
-        {
-            var teachers = await GetTeachersByFilter(filter, offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<TeacherReadSummaryDTO>>(teachers);
-        }
-
-        public async Task<IEnumerable<TeacherReadFullDTO>> GetTeachersDetailedByFilter(TeacherFilter filter, int offset, int limit, CancellationToken cancellationToken)
-        {
-            var teachers = await GetTeachersByFilter(filter, offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<TeacherReadFullDTO>>(teachers);
-        }
-
-        private async Task<Teacher[]> GetTeachersByFilter(TeacherFilter filter, int offset, int limit, CancellationToken cancellationToken)
+        public async Task<Teacher[]> GetTeachers(TeacherFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
             if (filter.Username is not null)
             {
@@ -132,22 +91,7 @@ namespace Schedule_App.API.Services
         }
 
 
-
-        public async Task<TeacherReadSummaryDTO> GetTeacherSummaryById(int id, CancellationToken cancellationToken)
-        {
-            var teacher = await GetTeacherById(id, cancellationToken);
-
-            return _mapper.Map<TeacherReadSummaryDTO>(teacher);
-        }
-
-        public async Task<TeacherReadFullDTO> GetTeacherDetailedById(int id, CancellationToken cancellationToken)
-        {
-            var teacher = await GetTeacherById(id, cancellationToken);
-
-            return _mapper.Map<TeacherReadFullDTO>(teacher);
-        }
-
-        private async Task<Teacher> GetTeacherById(int id, CancellationToken cancellationToken)
+        public async Task<Teacher> GetTeacherById(int id, CancellationToken cancellationToken)
         {
             var teacher = await _dataHelper.GetAuditableEntityByIdAsNoTracking<Teacher>(id, cancellationToken);
 
@@ -159,27 +103,28 @@ namespace Schedule_App.API.Services
         #endregion
 
         #region Create
-        public async Task<TeacherReadSummaryDTO> AddTeacher(TeacherCreateDTO teacherCreateDTO, CancellationToken cancellationToken)
+        public async Task<Teacher> AddTeacher(Teacher teacher, CancellationToken cancellationToken)
         {
             // if username is already taken
-            await EnsureUsernameIsNotTaken(teacherCreateDTO.Username, cancellationToken);
-
-            var teacher = _mapper.Map<Teacher>(teacherCreateDTO);
+            await EnsureUsernameIsNotTaken(teacher.Username, cancellationToken);
 
             // Hashing password
-            teacher.Password = PasswordHasher.Hash(teacherCreateDTO.Password);
+            teacher.Password = PasswordHasher.Hash(teacher.Password);
 
             await _repository.AddAuditableEntity<Teacher>(teacher, cancellationToken);
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<TeacherReadSummaryDTO>(teacher);
+            return teacher;
         }
         #endregion
 
         #region Update
-        public async Task<TeacherReadSummaryDTO> UpdateTeacher(int id, TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken)
+        public async Task<Teacher> UpdateTeacher(int id, TeacherUpdateDTO teacherUpdateDTO, CancellationToken cancellationToken)
         {
-            var teacher = await GetTeacherById(id, cancellationToken);
+            var teacher = await _dataHelper.GetAuditableEntityById<Teacher>(id, cancellationToken);
+
+            // Check if Teacher exists
+            EntityValidator.EnsureEntityExists(teacher, nameof(teacher.Id), id);
 
             // if new username is not null and not already taken
             if (teacherUpdateDTO.Username is not null)
@@ -203,7 +148,7 @@ namespace Schedule_App.API.Services
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<TeacherReadSummaryDTO>(teacher);
+            return teacher;
         }
         #endregion
 

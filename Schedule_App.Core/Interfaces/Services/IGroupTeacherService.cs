@@ -1,4 +1,5 @@
 ﻿using Schedule_App.Core.DTOs.GroupTeacher;
+using Schedule_App.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,15 @@ namespace Schedule_App.Core.Interfaces.Services
 {
     public interface IGroupTeacherService
     {
-        Task<IEnumerable<GroupTeacherReadDTO>> GetGroupTeacherAssociations(int offset, int limit, CancellationToken cancellationToken);
+        Task<GroupTeacher[]> GetGroupTeacherAssociations(int offset, int limit, CancellationToken cancellationToken);
 
-        Task<GroupTeacherReadDTO> GetGroupTeacherAssociation(int groupId, int teacherId, CancellationToken cancellationToken);
+        Task<GroupTeacher> GetGroupTeacherAssociation(int groupId, int teacherId, CancellationToken cancellationToken);
 
-        Task<IEnumerable<GroupTeacherReadDTO>> GetGroupsByTeacherId(int teacherId, int offset, int limit, CancellationToken cancellationToken);
+        Task<GroupTeacher[]> GetGroupsByTeacherId(int teacherId, int offset, int limit, CancellationToken cancellationToken);
 
-        Task<IEnumerable<GroupTeacherReadDTO>> GetTeachersByGroupId(int groupId, int offset, int limit, CancellationToken cancellationToken);
+        Task<GroupTeacher[]> GetTeachersByGroupId(int groupId, int offset, int limit, CancellationToken cancellationToken);
 
-        Task AddTeacherToGroup(GroupTeacherCreateDTO createDTO, CancellationToken cancellationToken);
+        Task AddTeacherToGroup(GroupTeacher groupTeacher, CancellationToken cancellationToken);
 
         Task RemoveTeacherFromGroup(int groupId, int teacherId, CancellationToken cancellationToken);
     }

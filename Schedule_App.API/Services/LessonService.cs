@@ -13,57 +13,16 @@ namespace Schedule_App.API.Services
     public class LessonService : ILessonService
     {
         private readonly IRepository _repository;
-        private readonly IMapper _mapper;
         private readonly IDataHelper _dataHelper;
 
-        public LessonService(IRepository repository, IMapper mapper, IDataHelper dataHelper)
+        public LessonService(IRepository repository, IDataHelper dataHelper)
         {
             _repository = repository;
-            _mapper = mapper;
             _dataHelper = dataHelper;
         }
 
         #region Read
-        public async Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummaries(int offset, int limit, CancellationToken cancellationToken)
-        {
-            var lessons = await GetLessons(offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<LessonReadSummaryDTO>>(lessons);
-        }
-
-        public async Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailed(int offset, int limit, CancellationToken cancellationToken)
-        {
-            var lessons = await GetLessons(offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<LessonReadFullDTO>>(lessons);
-        }
-
-        private Task<Lesson[]> GetLessons(int offset, int limit, CancellationToken cancellationToken)
-        {
-            return _repository.GetAllNotDeleted<Lesson>()
-                .AsNoTracking()
-                .Skip(offset)
-                .Take(limit)
-                .ToArrayAsync(cancellationToken);
-        }
-
-
-
-        public async Task<IEnumerable<LessonReadSummaryDTO>> GetLessonsSummariesByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken)
-        {
-            var lessons = await GetLessonsByFilter(filter, offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<LessonReadSummaryDTO>>(lessons);
-        }
-
-        public async Task<IEnumerable<LessonReadFullDTO>> GetLessonsDetailedByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken)
-        {
-            var lessons = await GetLessonsByFilter(filter, offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<LessonReadFullDTO>>(lessons);
-        }
-
-        private Task<Lesson[]> GetLessonsByFilter(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken)
+        public Task<Lesson[]> GetLessons(LessonFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
             var lessons = _repository.GetAllNotDeleted<Lesson>()
                 .AsNoTracking();
@@ -82,22 +41,7 @@ namespace Schedule_App.API.Services
                 .ToArrayAsync(cancellationToken);
         }
 
-
-
-        public async Task<LessonReadSummaryDTO> GetLessonSummaryById(int id, CancellationToken cancellationToken)
-        {
-            var lesson = await GetLessonById(id, cancellationToken);
-
-            return _mapper.Map<LessonReadSummaryDTO>(lesson);
-        }
-        public async Task<LessonReadFullDTO> GetLessonDetailedById(int id, CancellationToken cancellationToken)
-        {
-            var lesson = await GetLessonById(id, cancellationToken);
-
-            return _mapper.Map<LessonReadFullDTO>(lesson);
-        }
-
-        private async Task<Lesson> GetLessonById(int id, CancellationToken cancellationToken)
+        public async Task<Lesson> GetLessonById(int id, CancellationToken cancellationToken)
         {
             var lesson = await _dataHelper.GetAuditableEntityByIdAsNoTracking<Lesson>(id, cancellationToken);
 
@@ -109,11 +53,9 @@ namespace Schedule_App.API.Services
         #endregion
 
         #region Create
-        public async Task<LessonReadSummaryDTO> AddLesson(LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken)
+        public async Task<Lesson> AddLesson(Lesson lesson, CancellationToken cancellationToken)
         {
-            await ValidateCreateDTO(lessonCreateDTO, cancellationToken);
-
-            var lesson = _mapper.Map<Lesson>(lessonCreateDTO);
+            await ValidateLesson(lesson, cancellationToken);
 
             await _repository.AddAuditableEntity(lesson, cancellationToken);
             await _repository.SaveChanges(cancellationToken);
@@ -121,30 +63,33 @@ namespace Schedule_App.API.Services
             // To return DTO with filled DTOs in properties
             var result = await GetLessonById(lesson.Id, cancellationToken);
 
-            return _mapper.Map<LessonReadSummaryDTO>(result);
+            return result;
         }
 
         // Checks if income FKs reference to existing entities
-        private async Task ValidateCreateDTO(LessonCreateDTO lessonCreateDTO, CancellationToken cancellationToken)
+        private async Task ValidateLesson(Lesson lesson, CancellationToken cancellationToken)
         {
-            await _dataHelper.EnsureAuditableEntityExistsById<Classroom>(lessonCreateDTO.ClassroomId, cancellationToken);
+            await _dataHelper.EnsureAuditableEntityExistsById<Classroom>(lesson.ClassroomId, cancellationToken);
 
-            await _dataHelper.EnsureAuditableEntityExistsById<Subject>(lessonCreateDTO.SubjectId, cancellationToken);
+            await _dataHelper.EnsureAuditableEntityExistsById<Subject>(lesson.SubjectId, cancellationToken);
 
-            await _dataHelper.EnsureAuditableEntityExistsById<Group>(lessonCreateDTO.GroupId, cancellationToken);
+            await _dataHelper.EnsureAuditableEntityExistsById<Group>(lesson.GroupId, cancellationToken);
 
-            await _dataHelper.EnsureAuditableEntityExistsById<Teacher>(lessonCreateDTO.TeacherId, cancellationToken);
+            await _dataHelper.EnsureAuditableEntityExistsById<Teacher>(lesson.TeacherId, cancellationToken);
 
-            await _dataHelper.EnsureEntityExistsById<LessonStatus>(lessonCreateDTO.StatusId, cancellationToken);
+            await _dataHelper.EnsureEntityExistsById<LessonStatus>(lesson.StatusId, cancellationToken);
         }
         #endregion
 
         #region Update
-        public async Task<LessonReadSummaryDTO> UpdateLesson(int id, LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken)
+        public async Task<Lesson> UpdateLesson(int id, LessonUpdateDTO lessonUpdateDTO, CancellationToken cancellationToken)
         {
             await ValidateUpdateDTO(lessonUpdateDTO, cancellationToken);
 
-            var lesson = await GetLessonById(id, cancellationToken);
+            var lesson = await _dataHelper.GetAuditableEntityById<Lesson>(id, cancellationToken);
+
+            // Checks if Lesson exists
+            EntityValidator.EnsureEntityExists(lesson, nameof(lesson.Id), id);
 
             // Updating Lesson
             lesson.ClassroomId = lessonUpdateDTO.ClassroomId ?? lesson.ClassroomId;
@@ -160,7 +105,7 @@ namespace Schedule_App.API.Services
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<LessonReadSummaryDTO>(lesson);
+            return lesson;
         }
 
         // Checks if income FKs (in case they are given) reference to existing entities
@@ -186,10 +131,13 @@ namespace Schedule_App.API.Services
         #region Delete
         public async Task DeleteLesson(int id, CancellationToken cancellationToken)
         {
-            var lesson = await GetLessonById(id, cancellationToken);
+            var lesson = await _dataHelper.GetAuditableEntityById<Lesson>(id, cancellationToken);
+
+            // Checks if Lesson exists
+            EntityValidator.EnsureEntityExists(lesson, nameof(lesson.Id), id);
 
             // Changing state of timestamp's
-            await _repository.DeleteSoft(lesson, cancellationToken);
+            await _repository.DeleteSoft(lesson!, cancellationToken);
             await _repository.SaveChanges(cancellationToken);
         }
         #endregion

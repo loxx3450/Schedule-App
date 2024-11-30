@@ -13,57 +13,16 @@ namespace Schedule_App.API.Services
     public class SubjectService : ISubjectService
     {
         private readonly IRepository _repository;
-        private readonly IMapper _mapper;
         private readonly IDataHelper _dataHelper;
 
-        public SubjectService(IRepository repository, IMapper mapper, IDataHelper dataHelper)
+        public SubjectService(IRepository repository, IDataHelper dataHelper)
         {
             _repository = repository;
-            _mapper = mapper;
             _dataHelper = dataHelper;
         }
 
         #region Read
-        public async Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummaries(int offset, int limit, CancellationToken cancellationToken)
-        {
-            var subjects = await GetSubjects(offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<SubjectReadSummaryDTO>>(subjects);
-        }
-
-        public async Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailed(int offset, int limit, CancellationToken cancellationToken)
-        {
-            var subjects = await GetSubjects(offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<SubjectReadFullDTO>>(subjects);
-        }
-
-        private Task<Subject[]> GetSubjects(int offset, int limit, CancellationToken cancellationToken)
-        {
-            return _repository.GetAllNotDeleted<Subject>()
-                .AsNoTracking()
-                .Skip(offset)
-                .Take(limit)
-                .ToArrayAsync(cancellationToken);
-        }
-
-
-
-        public async Task<IEnumerable<SubjectReadSummaryDTO>> GetSubjectsSummariesByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken)
-        {
-            var subjects = await GetSubjectsByFilter(filter, offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<SubjectReadSummaryDTO>>(subjects);
-        }
-
-        public async Task<IEnumerable<SubjectReadFullDTO>> GetSubjectsDetailedByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken)
-        {
-            var subjects = await GetSubjectsByFilter(filter, offset, limit, cancellationToken);
-
-            return _mapper.Map<IEnumerable<SubjectReadFullDTO>>(subjects);
-        }
-
-        private async Task<Subject[]> GetSubjectsByFilter(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken)
+        public async Task<Subject[]> GetSubjects(SubjectFilter filter, int offset, int limit, CancellationToken cancellationToken)
         {
             if (filter.Title is not null)
             {
@@ -101,7 +60,7 @@ namespace Schedule_App.API.Services
             return subjects.Where(s => subjectsIds.Contains(s.Id));
         }
 
-        private async Task<Subject> GetSubjectByTitle(string title, CancellationToken cancellationToken = default)
+        private async Task<Subject> GetSubjectByTitle(string title, CancellationToken cancellationToken)
         {
             var subject = await _repository.GetAllNotDeleted<Subject>()
                 .AsNoTracking()
@@ -113,23 +72,7 @@ namespace Schedule_App.API.Services
             return subject!;
         }
 
-
-
-        public async Task<SubjectReadSummaryDTO> GetSubjectSummaryById(int id, CancellationToken cancellationToken)
-        {
-            var subject = await GetSubjectById(id, cancellationToken);
-
-            return _mapper.Map<SubjectReadSummaryDTO>(subject);
-        }
-
-        public async Task<SubjectReadFullDTO> GetSubjectDetailedById(int id, CancellationToken cancellationToken)
-        {
-            var subject = await GetSubjectById(id, cancellationToken);
-
-            return _mapper.Map<SubjectReadFullDTO>(subject);
-        }
-
-        private async Task<Subject> GetSubjectById(int id, CancellationToken cancellationToken = default)
+        public async Task<Subject> GetSubjectById(int id, CancellationToken cancellationToken)
         {
             var subject = await _dataHelper.GetAuditableEntityByIdAsNoTracking<Subject>(id, cancellationToken);
 
@@ -141,35 +84,35 @@ namespace Schedule_App.API.Services
         #endregion
 
         #region Create
-        public async Task<SubjectReadSummaryDTO> AddSubject(SubjectCreateDTO subjectCreateDTO, CancellationToken cancellationToken = default)
+        public async Task<Subject> AddSubject(Subject subject, CancellationToken cancellationToken)
         {
             // Checks if title is already taken
-            await EnsureTitleIsNotTaken(subjectCreateDTO.Title, cancellationToken);
+            await EnsureTitleIsNotTaken(subject.Title, cancellationToken);
 
-            var subject = _mapper.Map<Subject>(subjectCreateDTO);
-
-            await _repository.AddAuditableEntity<Subject>(subject, cancellationToken);
+            await _repository.AddAuditableEntity(subject, cancellationToken);
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<SubjectReadSummaryDTO>(subject);
+            return subject;
         }
         #endregion
 
         #region Update
-        public async Task<SubjectReadSummaryDTO> UpdateSubject(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken = default)
+        public async Task<Subject> UpdateSubject(int id, SubjectUpdateDTO subjectUpdateDTO, CancellationToken cancellationToken = default)
         {
-            var subject = await GetSubjectById(id, cancellationToken);
+            var subject = await _dataHelper.GetAuditableEntityById<Subject>(id, cancellationToken);
+
+            // Checks if Subject exists
+            EntityValidator.EnsureEntityExists(subject, nameof(subject.Id), id);
 
             // Checks if Title is already taken
             await EnsureTitleIsNotTaken(subjectUpdateDTO.Title, cancellationToken);
 
-            subject.Title = subjectUpdateDTO.Title;
-
-            subject.UpdatedAt = DateTime.UtcNow;
+            subject!.Title = subjectUpdateDTO.Title;
+            subject!.UpdatedAt = DateTime.UtcNow;
 
             await _repository.SaveChanges(cancellationToken);
 
-            return _mapper.Map<SubjectReadSummaryDTO>(subject);
+            return subject;
         }
         #endregion
 
